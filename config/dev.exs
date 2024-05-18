@@ -2,10 +2,11 @@ import Config
 
 # Configure your database
 config :rocketchat, Rocketchat.Repo,
-  username: "postgres",
-  password: "postgres",
-  hostname: "localhost",
-  database: "rocketchat_dev",
+  username: System.get_env("DATABASE_USERNAME"),
+  password: System.get_env("DATABASE_PASSWORD"),
+  hostname: System.get_env("DATABASE_HOST"),
+  database: System.get_env("DATABASE_DATABASE"),
+  port: System.get_env("DATABASE_PORT"),
   stacktrace: true,
   show_sensitive_data_on_connection_error: true,
   pool_size: 10
