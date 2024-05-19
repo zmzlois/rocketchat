@@ -35,9 +35,7 @@ COPY config/config.exs config/${MIX_ENV}.exs config/
 RUN mix deps.compile
 
 COPY priv priv
-
 COPY lib lib
-
 COPY assets assets
 
 # compile assets
@@ -51,4 +49,4 @@ RUN mix compile
 COPY config/runtime.exs config/
 RUN mix release
 
-CMD ["./_build/prod/rel/rocketchat", "start"]
+CMD ["_build/prod/rel/rocketchat/bin/rocketchat", "start"]
