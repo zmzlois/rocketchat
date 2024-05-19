@@ -49,9 +49,9 @@ RUN mix compile
 
 # Changes to config/runtime.exs don't require recompiling the code
 COPY config/runtime.exs config/
-
-COPY rel rel
 RUN mix release
+COPY rel rel
+
 
 # start a new build stage so that the final image will only contain
 # the compiled release and other runtime necessities
@@ -73,6 +73,7 @@ RUN chown nobody /app
 
 # set runner ENV
 ENV MIX_ENV="prod"
+RUN mix assets.deploy
 
 # Only copy the final release from the build stage
 COPY --from=builder --chown=nobody:root /app/_build/${MIX_ENV}/rel/rocketchat ./
