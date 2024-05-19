@@ -51,4 +51,4 @@ RUN mix compile
 COPY config/runtime.exs config/
 RUN mix release
 
-CMD ["./_build/prod/rel/test_app/bin/test_app", "start"]
+CMD ["./_build/prod/rel/rocketchat", "start"]
