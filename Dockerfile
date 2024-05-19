@@ -50,9 +50,9 @@ RUN mix compile
 
 # Changes to config/runtime.exs don't require recompiling the code
 COPY config/runtime.exs config/
-
-COPY rel rel
 RUN mix release
+COPY _build/${MIX_ENV}/rel rel
+
 RUN ls -la _build
 RUN ls -la _build/${MIX_ENV}/rel/rocketchat
 RUN local files=${echo _build/${MIX_ENV}}
