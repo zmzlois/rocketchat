@@ -31,7 +31,7 @@ defmodule Config.Runtime do
     config :rocketchat, Rocketchat.Repo,
       # ssl: true,
       url: database_url,
-      pool_size: env!("POOL_SIZE", :ineteger, 10),
+      pool_size: env!("POOL_SIZE", :integer, 10),
       socket_options: maybe_ipv6
 
     # The secret key base is used to sign/encrypt cookies and other secrets.
