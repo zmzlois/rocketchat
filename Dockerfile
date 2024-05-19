@@ -46,11 +46,12 @@ RUN mix assets.deploy
 
 # Compile the release
 RUN mix compile
+ENV MIX_ENV="prod"
 
 # Changes to config/runtime.exs don't require recompiling the code
 COPY config/runtime.exs config/
 RUN mix release
-COPY rel rel
+COPY _build/${MIX_ENV}/rel rel
 
 
 # start a new build stage so that the final image will only contain
