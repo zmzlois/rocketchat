@@ -1,4 +1,3 @@
-
 #
 ARG ELIXIR_VERSION=1.16.1
 ARG OTP_VERSION=26.2.2
@@ -11,7 +10,7 @@ FROM ${BUILDER_IMAGE} as builder
 
 # install build dependencies
 RUN apt-get update -y \
-    && apt-get install -y build-essential iproute2 inotify-tools\
+    && apt-get install -y build-essential iproute2 git inotify-tools\
     && apt-get clean && rm -f /var/lib/apt/lists/*_*
 
 # prepare build dir
@@ -51,44 +50,5 @@ RUN mix compile
 # Changes to config/runtime.exs don't require recompiling the code
 COPY config/runtime.exs config/
 RUN mix release
-RUN echo ls -la _build
-RUN ls -la _build/${MIX_ENV}/rel/rocketchat
-RUN local files=${echo _build/${MIX_ENV}}
-RUN echo $files
-COPY _build/${MIX_ENV}/rel _build/${MIX_ENV}/rel
 
-
-
-# start a new build stage so that the final image will only contain
-# the compiled release and other runtime necessities
-FROM ${RUNNER_IMAGE}
-
-RUN apt-get update -y && \
-    apt-get install -y libstdc++6 openssl libncurses5 locales ca-certificates git \
-    && apt-get clean && rm -f /var/lib/apt/lists/*_*
-
-# Set the locale
-RUN sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen && locale-gen
-
-ENV LANG en_US.UTF-8
-ENV LANGUAGE en_US:en
-ENV LC_ALL en_US.UTF-8
-
-WORKDIR "/app"
-RUN chown nobody /app
-
-# set runner ENV
-ENV MIX_ENV="prod"
-RUN mix assets.deploy
-
-# Only copy the final release from the build stage
-COPY --from=builder --chown=nobody:root /app/_build/${MIX_ENV}/rel/rocketchat ./
-
-USER nobody
-
-# If using an environment that doesn't automatically reap zombie processes, it is
-# advised to add an init process such as tini via `apt-get install`
-# above and adding an entrypoint. See https://github.com/krallin/tini for details
-# ENTRYPOINT ["/tini", "--"]
-
-CMD ["/app/bin/server"]
+CMD ["./_build/prod/rel/test_app/bin/test_app", "start"]
