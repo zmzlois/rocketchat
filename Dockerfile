@@ -50,16 +50,20 @@ RUN mix compile
 
 # Changes to config/runtime.exs don't require recompiling the code
 COPY config/runtime.exs config/
-RUN mix release
-COPY _build/${MIX_ENV}/rel _build/${MIX_ENV}/rel
 
+COPY rel rel
+RUN mix release
+RUN ls -la _build
+RUN ls -la _build/${MIX_ENV}/rel/rocketchat
+RUN local files=${echo _build/${MIX_ENV}}
+RUN echo $files
 
 # start a new build stage so that the final image will only contain
 # the compiled release and other runtime necessities
 FROM ${RUNNER_IMAGE}
 
 RUN apt-get update -y && \
-    apt-get install -y libstdc++6 openssl libncurses5 locales ca-certificates \
+    apt-get install -y libstdc++6 openssl libncurses5 locales ca-certificates git \
     && apt-get clean && rm -f /var/lib/apt/lists/*_*
 
 # Set the locale
