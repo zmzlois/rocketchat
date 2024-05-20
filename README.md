@@ -45,3 +45,4 @@ mix deps.get
 mix pow.install
 mix ecto.setup
 mix setup
+```
