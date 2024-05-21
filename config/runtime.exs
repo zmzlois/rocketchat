@@ -113,20 +113,29 @@ defmodule Config.Runtime do
   end
 
   def setup(:dev) do
+    setup_local_db_connection()
+  end
+
+  def setup(:test) do
+  end
+
+  def setup(_) do
+    IO.inspect(config_env(),
+      label: "Runtime config didn't match any environment. Current environment"
+    )
+  end
+
+  defp setup_local_db_connection do
     # Configure your database
     config :rocketchat, Rocketchat.Repo,
       username: env!("DB_USER", :string, "rocketchat"),
       password: env!("DB_PASS", :string, "rocketchat"),
       hostname: env!("DB_HOST", :string, "0.0.0.0"),
       database: env!("DB_NAME", :string, "rocketchat-pg"),
-      port: env!("DB_PORT", :integer?, 5432),
-      stacktrace: env!("", :bool, true),
+      port: env!("DB_PORT", :integer!, 5432),
+      stacktrace: env!("DB_LOGS", :bool, true),
       show_sensitive_data_on_connection_error: true,
-      pool_size: env!("DB_POOL_SIZE", :integer?, 10)
-  end
-
-  def setup(_) do
-    IO.inspect(config_env(), label: "Didn't match any environment. Current environment")
+      pool_size: env!("DB_POOL_SIZE", :integer!, 10)
   end
 end
 
