@@ -4,7 +4,12 @@ defmodule RocketchatWeb.ProductControllerTest do
   import Rocketchat.CatalogFixtures
 
   @create_attrs %{description: "some description", title: "some title", price: "120.5", views: 42}
-  @update_attrs %{description: "some updated description", title: "some updated title", price: "456.7", views: 43}
+  @update_attrs %{
+    description: "some updated description",
+    title: "some updated title",
+    price: "456.7",
+    views: 43
+  }
   @invalid_attrs %{description: nil, title: nil, price: nil, views: nil}
 
   describe "index" do
