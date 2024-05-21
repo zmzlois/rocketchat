@@ -1,0 +1,29 @@
+{
+	"HEEx expression": {
+		"scope": "phoenix-heex",
+		"prefix": "%",
+		"body": [
+			"<%= $1 %>"
+		],
+	},
+	"HEEx template": {
+		"scope": "elixir",
+		"prefix": "~H",
+		"body": [
+			"~H\"\"\"",
+			"$1",
+			"\"\"\""
+		],
+	},
+	"Function component": {
+		"scope": "elixir",
+		"prefix": "fc",
+		"body": [
+			"def $1(assigns) do",
+			"~H\"\"\"",
+			"$2",
+			"\"\"\"",
+			"end"
+		],
+	}
+}

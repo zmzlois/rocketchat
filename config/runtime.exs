@@ -113,7 +113,6 @@ defmodule Config.Runtime do
   end
 
   def setup(:dev) do
-
     # Configure your database
     config :rocketchat, Rocketchat.Repo,
       username: env!("DB_USER", :string, "rocketchat"),
@@ -124,13 +123,10 @@ defmodule Config.Runtime do
       stacktrace: env!("", :bool, true),
       show_sensitive_data_on_connection_error: true,
       pool_size: env!("DB_POOL_SIZE", :integer?, 10)
-
-  end 
+  end
 
   def setup(_) do
-    IO.inspect(config_env(), [
-      label: "Didn't match any environment. Current environment"
-    ])
+    IO.inspect(config_env(), label: "Didn't match any environment. Current environment")
   end
 end
 
