@@ -17,7 +17,7 @@ defmodule Rocketchat.Catalog.Product do
   @doc false
   def changeset(product, attrs) do
     product
-    |> cast(attrs, [:title, :description, :price, :views])
+    |> cast(attrs, [:title, :description, :price])
     |> validate_required([:title, :description, :price, :views])
   end
 end

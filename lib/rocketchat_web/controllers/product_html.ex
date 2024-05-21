@@ -49,6 +49,13 @@ defmodule RocketchatWeb.ProductHTML do
       <:item title="Description"><%= @product.description %></:item>
       <:item title="Price"><%= @product.price %></:item>
       <:item title="Views"><%= @product.views %></:item>
+      <:item title="Categories">
+        <ul>
+          <li :for={c <- @product.categories}>
+            <%= c.title %>
+          </li>
+        </ul>
+      </:item>
     </.list>
 
     <.back navigate={~p"/products"}>Back to products</.back>
@@ -96,11 +103,26 @@ defmodule RocketchatWeb.ProductHTML do
       <.input field={f[:title]} type="text" label="Title" />
       <.input field={f[:description]} type="text" label="Description" />
       <.input field={f[:price]} type="number" label="Price" step="any" />
-      <.input field={f[:views]} type="number" label="Views" />
+      <.input
+        field={f[:category_ids]}
+        type="select"
+        multiple
+        label="Categories"
+        options={category_opts(@changeset)}
+      />
       <:actions>
         <.button>Save Product</.button>
       </:actions>
     </.simple_form>
     """
+  end
+
+  def category_opts(changeset) do
+    existing_ids =
+      Ecto.Changeset.get_change(changeset, :categories, [])
+      |> Enum.map(& &1.data.id)
+
+    for cat <- Rocketchat.Catalog.list_categories(),
+        do: [key: cat.title, value: cat.id, selected: cat.id in existing_ids]
   end
 end
