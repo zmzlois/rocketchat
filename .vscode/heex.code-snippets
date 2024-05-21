@@ -6,6 +6,13 @@
 			"<%= $1 %>"
 		],
 	},
+	"HEEx element": {
+		"scope": "phoenix-heex",
+		"prefix": "<",
+		"body": [
+			"<$1>$2</$1>"
+		],
+	},
 	"HEEx template": {
 		"scope": "elixir",
 		"prefix": "~H",
