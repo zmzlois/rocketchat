@@ -1,11 +1,11 @@
 # rocketchat
  
-### Environment Variables
+## Environment Variables
 
-Sourcing environment variables
-
+Make a copy of `.env.example` and call it `.env`. Then edit the variables `.env` 
+as necessary.
 ```sh
-source .env
+cp .env.example .env
 ```
 
 Error creating database? 
@@ -21,4 +21,9 @@ MIX_ENV=prod mix assets.deploy
 Prune app 
 ```sh
 mix phx.digest.clean --all
+```
+
+### Run locally 
+```sh
+mix phx.server
 ```

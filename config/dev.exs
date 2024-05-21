@@ -1,16 +1,5 @@
 import Config
 
-# Configure your database
-config :rocketchat, Rocketchat.Repo,
-  username: "rocketchat",
-  password: "rocketchat",
-  hostname: "0.0.0.0",
-  database: "rocketchat-pg",
-  port: 5432,
-  stacktrace: true,
-  show_sensitive_data_on_connection_error: true,
-  pool_size: 10
-
 # For development, we disable any cache and enable
 # debugging and code reloading.
 #

@@ -1,13 +1,15 @@
 import Config
 import Dotenvy
 
-source!([".env", System.get_env()])
 # config/runtime.exs is executed for all environments, including
 # during releases. It is executed after compilation and before the
 # system starts, so it is typically used to load production configuration
 # and secrets from environment variables or elsewhere. Do not define
 # any compile-time configuration in here, as it won't be applied.
 # The block below contains prod specific runtime configuration.
+
+# Load environment variables from `.env` file in runtime.
+source!([".env", System.get_env()])
 
 # ## Using releases
 #
@@ -110,7 +112,25 @@ defmodule Config.Runtime do
     # See https://hexdocs.pm/swoosh/Swoosh.html#module-installation for details.
   end
 
+  def setup(:dev) do
+
+    # Configure your database
+    config :rocketchat, Rocketchat.Repo,
+      username: env!("DB_USER", :string, "rocketchat"),
+      password: env!("DB_PASS", :string, "rocketchat"),
+      hostname: env!("DB_HOST", :string, "0.0.0.0"),
+      database: env!("DB_NAME", :string, "rocketchat-pg"),
+      port: env!("DB_PORT", :integer?, 5432),
+      stacktrace: env!("", :bool, true),
+      show_sensitive_data_on_connection_error: true,
+      pool_size: env!("DB_POOL_SIZE", :integer?, 10)
+
+  end 
+
   def setup(_) do
+    IO.inspect(config_env(), [
+      label: "Didn't match any environment. Current environment"
+    ])
   end
 end
 
