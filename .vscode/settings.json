@@ -1,0 +1,9 @@
+{
+    "tailwindCSS.includeLanguages": {
+        "elixir": "html",
+        "phoenix-heex": "html"
+    },
+    "explorer.fileNesting.patterns": {
+        "*_controller.ex": "${capture}_html.ex, ${capture}_json.ex"
+    }
+}
