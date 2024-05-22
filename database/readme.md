@@ -1,9 +1,16 @@
-# Build
+# Common commands
+
+## Build
 ```bash
 sudo docker build -t rocketchat-pg -f ./database/postgres.dockerfile .
 ```
 
-# Run
+## Run
 ```bash
 sudo docker run -p 5432:5432 -v rocketchat-pg:/app -v rocketchat-pg-data:/var/lib/postgresql/data rocketchat-pg
+```
+
+## Clean
+```bash
+sudo docker volume rm rocketchat-pg-data
 ```
