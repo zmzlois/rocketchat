@@ -13,6 +13,11 @@ defmodule RocketchatWeb.CartHtml do
       <% _ -> %>
         <.header>
           My Cart
+          <:actions>
+            <.link href={~p"/orders"} method="post">
+              <.button>Complete order</.button>
+            </.link>
+          </:actions>
         </.header>
 
         <.simple_form :let={f} for={@changeset} action={~p"/cart"}>
@@ -32,5 +37,5 @@ defmodule RocketchatWeb.CartHtml do
     """
   end
 
-  defp currency_to_str(val = %Decimal{}), do: "$#{Decimal.round(val, 2)}"
+  def currency_to_str(val = %Decimal{}), do: "$#{Decimal.round(val, 2)}"
 end

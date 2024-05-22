@@ -118,15 +118,11 @@ defmodule Rocketchat.Orders do
         end
       )
 
-    order =
-      Ecto.Changeset.change(
-        %Order{},
-        %Order{
-          user_uuid: cart.user_uuid,
-          total_price: ShoppingCart.total_cart_price(cart),
-          line_items: line_items
-        }
-      )
+    order = %Order{
+      user_uuid: cart.user_uuid,
+      total_price: ShoppingCart.total_cart_price(cart),
+      line_items: line_items
+    }
 
     Ecto.Multi.new()
     |> Ecto.Multi.insert(:order, order)
