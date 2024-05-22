@@ -5,6 +5,8 @@ defmodule Rocketchat.ShoppingCart.Cart do
   schema "carts" do
     field :user_uuid, Ecto.UUID
 
+    has_many :items, Rocketchat.ShoppingCart.CartItem
+
     timestamps(type: :utc_datetime)
   end
 

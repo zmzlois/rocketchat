@@ -4,9 +4,11 @@ defmodule Rocketchat.ShoppingCart do
   """
 
   import Ecto.Query, warn: false
+  alias Rocketchat.Catalog.Product
   alias Rocketchat.Repo
 
-  alias Rocketchat.ShoppingCart.Cart
+  alias Rocketchat.Catalog
+  alias Rocketchat.ShoppingCart.{Cart, CartItem}
 
   @doc """
   Returns the list of carts.
@@ -19,6 +21,18 @@ defmodule Rocketchat.ShoppingCart do
   """
   def list_carts do
     Repo.all(Cart)
+  end
+
+  def get_cart_by_user_uuid(user_uuid) do
+    Repo.one(
+      from(c in Cart,
+        where: c.user_uuid == ^user_uuid,
+        left_join: i in assoc(c, :items),
+        left_join: p in assoc(i, :product),
+        order_by: [asc: i.inserted_at],
+        preload: [items: {i, product: p}]
+      )
+    )
   end
 
   @doc """
@@ -49,9 +63,41 @@ defmodule Rocketchat.ShoppingCart do
       {:error, %Ecto.Changeset{}}
 
   """
-  def create_cart(attrs \\ %{}) do
-    Cart.changeset(%Cart{}, attrs)
+  def create_cart(user_uuid) do
+    %Cart{user_uuid: user_uuid}
+    |> Cart.changeset(%{})
     |> Repo.insert()
+    |> case do
+      {:ok, cart} -> {:ok, reload_cart(cart)}
+      err = {:error, _} -> err
+    end
+  end
+
+  defp reload_cart(%Cart{} = cart), do: get_cart_by_user_uuid(cart.user_uuid)
+
+  def add_item_to_cart(%Cart{} = cart, product_id) do
+    product = Catalog.get_product!(product_id)
+
+    %CartItem{quantity: 1, price_when_carted: product.price}
+    |> CartItem.changeset(%{})
+    |> Ecto.Changeset.put_assoc(:cart, cart)
+    |> Ecto.Changeset.put_assoc(:product, product)
+    |> Repo.insert(
+      on_conflict: [inc: [quantity: 1]],
+      conflict_target: [:cart_id, :product_id]
+    )
+  end
+
+  def remove_item_from_cart(%Cart{} = cart, product_id) do
+    {1, _} =
+      Repo.delete_all(
+        from(i in CartItem,
+          where: i.cart_id == ^cart.id,
+          where: i.product_id == ^product_id
+        )
+      )
+
+    {:ok, reload_cart(cart)}
   end
 
   @doc """
@@ -67,9 +113,23 @@ defmodule Rocketchat.ShoppingCart do
 
   """
   def update_cart(%Cart{} = cart, attrs) do
-    cart
-    |> Cart.changeset(attrs)
-    |> Repo.update()
+    alias Ecto.{Changeset, Multi}
+
+    changeset =
+      cart
+      |> Cart.changeset(attrs)
+      |> Changeset.cast_assoc(:items, with: &CartItem.changeset/2)
+
+    Multi.new()
+    |> Multi.update(:cart, changeset)
+    |> Multi.delete_all(:discarded_items, fn %{cart: cart = %Cart{}} ->
+      from(i in CartItem, where: i.cart_id == ^cart.id and i.quantity == 0)
+    end)
+    |> Repo.transaction()
+    |> case do
+      {:ok, %{cart: cart}} -> {:ok, cart}
+      {:error, :cart, changeset, _} -> {:error, changeset}
+    end
   end
 
   @doc """
@@ -195,5 +255,15 @@ defmodule Rocketchat.ShoppingCart do
   """
   def change_cart_item(%CartItem{} = cart_item, attrs \\ %{}) do
     CartItem.changeset(cart_item, attrs)
+  end
+
+  def total_item_price(%CartItem{quantity: quantity, product: %Product{price: price}}) do
+    Decimal.mult(quantity, price)
+  end
+
+  def total_cart_price(%Cart{items: items}) do
+    items
+    |> Stream.map(&total_item_price/1)
+    |> Enum.reduce(&Decimal.add/2)
   end
 end

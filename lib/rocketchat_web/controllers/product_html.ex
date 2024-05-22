@@ -41,6 +41,9 @@ defmodule RocketchatWeb.ProductHTML do
         <.link href={~p"/products/#{@product}/edit"}>
           <.button>Edit product</.button>
         </.link>
+        <.link href={~p"/cart_items?product_id=#{@product.id}"} method="post">
+          <.button>Add to cart</.button>
+        </.link>
       </:actions>
     </.header>
 
