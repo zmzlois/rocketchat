@@ -9,7 +9,8 @@ defmodule Rocketchat.MixProject do
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
-      deps: deps()
+      deps: deps(),
+
     ]
   end
 
@@ -53,6 +54,10 @@ defmodule Rocketchat.MixProject do
        compile: false,
        depth: 1},
       {:swoosh, "~> 1.5"},
+      {:pow_assent, "~> 0.4.18"},
+      # Optional, but recommended for SSL validation with :httpc adapter
+      {:certifi, "~> 2.4"},
+      {:ssl_verify_fun, "~> 1.1"},
       {:finch, "~> 0.13"},
       {:telemetry_metrics, "~> 1.0"},
       {:telemetry_poller, "~> 1.0"},

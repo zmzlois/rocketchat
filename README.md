@@ -1,12 +1,13 @@
 # rocketchat
- 
-## Environment Variables
 
-Make a copy of `.env.example` and call it `.env`. Then edit the variables `.env` 
-as necessary.
-```sh
-cp .env.example .env
+### Install dependencies 
+
+```sh 
+mix deps.get
 ```
+ 
+### Environment Variables
+
 
 Error creating database? 
 ```sh
@@ -23,7 +24,25 @@ Prune app
 mix phx.digest.clean --all
 ```
 
-### Run locally 
+### OAuth 
+
+[Pow - Assent](https://github.com/pow-auth/pow_assent)
+
+If you are running local database for development remember to run initial migration 
+
+local database set up:  
+```sh 
+docker build -t rocketchat-pg -f ./database/postgres.dockerfile .
+```
+and then 
+```sh 
+docker run -p 5432:5432 rocketchat-pg
+```
+
+Pow related set up: 
 ```sh
-mix phx.server
+mix deps.get
+mix pow.install
+mix ecto.setup
+mix setup
 ```

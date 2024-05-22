@@ -1,5 +1,7 @@
 defmodule RocketchatWeb.Router do
   use RocketchatWeb, :router
+  use Pow.Phoenix.Router
+  use PowAssent.Phoenix.Router
 
   pipeline :browser do
     plug :accepts, ["html"]
@@ -12,12 +14,37 @@ defmodule RocketchatWeb.Router do
     plug :fetch_current_cart
   end
 
+  pipeline :protected do
+    plug Pow.Plug.RequireAuthenticated,
+      error_handler: Pow.Phoenix.PlugErrorHandler
+  end
+
   pipeline :api do
     plug :accepts, ["json"]
   end
 
-  scope "/", RocketchatWeb do
+  pipeline :skip_csrf_protection do
+    plug :accepts, ["html"]
+    plug :fetch_session
+    plug :fetch_flash
+    plug :put_secure_browser_headers
+  end
+
+  scope "/" do
+    pipe_through :skip_csrf_protection
+
+    pow_assent_authorization_post_callback_routes()
+  end
+
+  scope "/" do
     pipe_through :browser
+
+    pow_routes()
+    pow_assent_routes()
+  end
+
+  scope "/", RocketchatWeb do
+    pipe_through [:browser, :protected]
 
     get "/", PageController, :home
     resources "/products", ProductController
