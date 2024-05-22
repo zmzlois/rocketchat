@@ -75,6 +75,11 @@ defmodule Rocketchat.ShoppingCart do
 
   defp reload_cart(%Cart{} = cart), do: get_cart_by_user_uuid(cart.user_uuid)
 
+  def prune_cart_items(%Cart{} = cart) do
+    {_, _} = Repo.delete_all(from(i in CartItem, where: i.cart_id == ^cart.id))
+    {:ok, reload_cart(cart)}
+  end
+
   def add_item_to_cart(%Cart{} = cart, product_id) do
     product = Catalog.get_product!(product_id)
 
