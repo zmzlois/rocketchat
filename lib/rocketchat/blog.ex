@@ -21,6 +21,18 @@ defmodule Rocketchat.Blog do
     Repo.all(Post)
   end
 
+  def list_posts("") do
+    list_posts()
+  end
+
+  def list_posts(nil) do
+    list_posts()
+  end
+
+  def list_posts(filter) do
+    Repo.all(from(p in Post, where: ilike(p.title, ^"#{filter}%")))
+  end
+
   @doc """
   Gets a single post.
 

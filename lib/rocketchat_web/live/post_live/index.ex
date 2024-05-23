@@ -45,6 +45,10 @@ defmodule RocketchatWeb.PostLive.Index do
     {:noreply, stream_delete(socket, :posts, post)}
   end
 
+  def handle_event("filter", %{"filter" => filter}, socket) do
+    {:noreply, stream(socket, :posts, Blog.list_posts(filter), reset: true)}
+  end
+
   @impl true
   def render(assigns) do
     ~H"""
@@ -56,7 +60,9 @@ defmodule RocketchatWeb.PostLive.Index do
         </.link>
       </:actions>
     </.header>
-
+    <form>
+      <input name="filter" placeholder="filter" phx-change={JS.push("filter")} />
+    </form>
     <.table
       id="posts"
       rows={@streams.posts}

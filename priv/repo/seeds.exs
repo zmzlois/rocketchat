@@ -25,9 +25,11 @@ for i <- 1..10 do
   })
 end
 
-for i <- 1..10 do
+for c <- ?A..?Z, i <- 1..10 do
+  l = <<c::utf8>>
+
   Rocketchat.Blog.create_post(%{
-    title: "Post #{i}",
-    body: "Thie is a blog post number #{i}."
+    title: "#{l} Post #{i}",
+    body: "Thie is a blog post number #{i} for letter #{l}."
   })
 end

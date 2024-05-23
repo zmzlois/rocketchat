@@ -4,32 +4,6 @@ defmodule RocketchatWeb.PostLive.FormComponent do
   alias Rocketchat.Blog
 
   @impl true
-  def render(assigns) do
-    ~H"""
-    <div>
-      <.header>
-        <%= @title %>
-        <:subtitle>Use this form to manage post records in your database.</:subtitle>
-      </.header>
-
-      <.simple_form
-        for={@form}
-        id="post-form"
-        phx-target={@myself}
-        phx-change="validate"
-        phx-submit="save"
-      >
-        <.input field={@form[:title]} type="text" label="Title" />
-        <.input field={@form[:body]} type="text" label="Body" />
-        <:actions>
-          <.button phx-disable-with="Saving...">Save Post</.button>
-        </:actions>
-      </.simple_form>
-    </div>
-    """
-  end
-
-  @impl true
   def update(%{post: post} = assigns, socket) do
     changeset = Blog.change_post(post)
 
@@ -89,4 +63,30 @@ defmodule RocketchatWeb.PostLive.FormComponent do
   end
 
   defp notify_parent(msg), do: send(self(), {__MODULE__, msg})
+
+  @impl true
+  def render(assigns) do
+    ~H"""
+    <div>
+      <.header>
+        <%= @title %>
+        <:subtitle>Use this form to manage post records in your database.</:subtitle>
+      </.header>
+
+      <.simple_form
+        for={@form}
+        id="post-form"
+        phx-target={@myself}
+        phx-change="validate"
+        phx-submit="save"
+      >
+        <.input field={@form[:title]} type="text" label="Title" />
+        <.input field={@form[:body]} type="text" label="Body" />
+        <:actions>
+          <.button phx-disable-with="Saving...">Save Post</.button>
+        </:actions>
+      </.simple_form>
+    </div>
+    """
+  end
 end
