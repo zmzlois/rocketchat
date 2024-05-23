@@ -71,10 +71,7 @@ defmodule RocketchatWeb.PostLive.Index do
         <.link patch={~p"/posts/#{post}/edit"}>Edit</.link>
       </:action>
       <:action :let={{id, post}}>
-        <.link
-          phx-click={JS.push("delete", value: %{id: post.id}) |> hide("##{id}")}
-          data-confirm="Are you sure?"
-        >
+        <.link phx-click={JS.push("delete", value: %{id: post.id}) |> hide("##{id}")}>
           Delete
         </.link>
       </:action>

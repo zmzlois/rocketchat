@@ -24,3 +24,10 @@ for i <- 1..10 do
     category_ids: Enum.take_random(category_ids, 2)
   })
 end
+
+for i <- 1..10 do
+  Rocketchat.Blog.create_post(%{
+    title: "Post #{i}",
+    body: "Thie is a blog post number #{i}."
+  })
+end
