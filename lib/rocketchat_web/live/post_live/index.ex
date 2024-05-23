@@ -5,8 +5,9 @@ defmodule RocketchatWeb.PostLive.Index do
   alias Rocketchat.Blog.Post
 
   @impl true
-  def mount(_params, _session, socket) do
-    {:ok, stream(socket, :posts, Blog.list_posts())}
+  def mount(params, _session, socket) do
+    filter = params["filter"]
+    {:ok, assign(socket, :filter, filter) |> stream(:posts, Blog.list_posts(filter))}
   end
 
   @impl true
@@ -46,7 +47,10 @@ defmodule RocketchatWeb.PostLive.Index do
   end
 
   def handle_event("filter", %{"filter" => filter}, socket) do
-    {:noreply, stream(socket, :posts, Blog.list_posts(filter), reset: true)}
+    {:noreply,
+     assign(socket, :filter, filter)
+     |> stream(:posts, Blog.list_posts(filter), reset: true)
+     |> push_patch(to: ~p"/posts?filter=#{filter}", replace: true)}
   end
 
   @impl true
@@ -61,7 +65,7 @@ defmodule RocketchatWeb.PostLive.Index do
       </:actions>
     </.header>
     <form>
-      <input name="filter" placeholder="filter" phx-change={JS.push("filter")} />
+      <input name="filter" placeholder="filter" value={@filter} phx-change={JS.push("filter")} />
     </form>
     <.table
       id="posts"
