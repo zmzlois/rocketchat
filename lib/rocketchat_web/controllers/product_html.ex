@@ -24,7 +24,7 @@ defmodule RocketchatWeb.ProductHTML do
         <.link navigate={~p"/products/#{product}/edit"}>Edit</.link>
       </:action>
       <:action :let={product}>
-        <.link href={~p"/products/#{product}"} method="delete" data-confirm="Are you sure?">
+        <.link href={~p"/products/#{product}"} method="delete">
           Delete
         </.link>
       </:action>
