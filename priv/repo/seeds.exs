@@ -9,6 +9,18 @@
 #
 # We recommend using the bang functions (`insert!`, `update!`
 # and so on) as they will fail if something goes wrong.
+
 for title <- ["Home Improvement", "Power Tools", "Gardening", "Books", "Education"] do
-  {:ok, _} = Rocketchat.Catalog.create_category(%{title: title})
+  Rocketchat.Catalog.create_category(%{title: title})
+end
+
+category_ids = Rocketchat.Catalog.list_categories() |> Enum.map(& &1.id)
+
+for i <- 1..10 do
+  Rocketchat.Catalog.create_product(%{
+    description: "Product #{i} description",
+    price: i * 11,
+    title: "Product #{i}",
+    category_ids: Enum.take_random(category_ids, 2)
+  })
 end

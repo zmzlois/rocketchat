@@ -102,7 +102,7 @@ defmodule Rocketchat.Catalog do
 
   """
   def change_product(%Product{} = product, attrs \\ %{}) do
-    categories = list_categories_by_id(attrs["category_ids"])
+    categories = list_categories_by_id(attrs["category_ids"] || attrs[:category_ids])
 
     Repo.preload(product, :categories)
     |> Product.changeset(attrs)
