@@ -72,7 +72,16 @@ defmodule RocketchatWeb.PostLive.Index do
       rows={@streams.posts}
       row_click={fn {_id, post} -> JS.navigate(~p"/posts/#{post}") end}
     >
-      <:col :let={{_id, post}} label="Title"><%= post.title %></:col>
+      <:col :let={{_id, post}} label="Title">
+        <div class="flex gap-1 items-center">
+          <img
+            :if={post.image_key}
+            src={~p"/uploads/#{post.image_key}"}
+            class="size-10 rounded-full object-cover"
+          />
+          <span><%= post.title %></span>
+        </div>
+      </:col>
       <:col :let={{_id, post}} label="Body"><%= post.body %></:col>
       <:action :let={{_id, post}}>
         <div class="sr-only">
