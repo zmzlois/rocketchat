@@ -5,6 +5,7 @@ defmodule Rocketchat.Blog.Post do
   schema "posts" do
     field :title, :string
     field :body, :string
+    field :image_key, :string
 
     timestamps(type: :utc_datetime)
   end
@@ -12,7 +13,7 @@ defmodule Rocketchat.Blog.Post do
   @doc false
   def changeset(post, attrs) do
     post
-    |> cast(attrs, [:title, :body])
+    |> cast(attrs, [:title, :body, :image_key])
     |> validate_required([:title, :body])
   end
 end
