@@ -10,11 +10,11 @@ defmodule RocketchatWeb.PostLive.FormComponent do
     {:ok,
      socket
      |> assign(assigns)
-     |> assign_form(changeset)}
+     |> assign_form(changeset)
+     |> allow_upload(:image, accept: ~w"image/*")}
   end
 
   @impl true
-  # todo - try atom event
   def handle_event("validate", %{"post" => post_params}, socket) do
     changeset =
       socket.assigns.post
@@ -25,17 +25,27 @@ defmodule RocketchatWeb.PostLive.FormComponent do
   end
 
   def handle_event("save", %{"post" => post_params}, socket) do
-    save_post(socket, socket.assigns.action, post_params)
-  end
+    _uploaded_files =
+      consume_uploaded_entries(socket, :image, fn
+        %{path: path}, %Phoenix.LiveView.UploadEntry{client_name: name} ->
+          dest_dir = Application.app_dir(:rocketchat, "priv/static/uploads") |> IO.inspect()
+          :ok = File.mkdir_p(dest_dir)
 
-  defp save_post(socket, :edit, post_params) do
-    case Blog.update_post(socket.assigns.post, post_params) do
-      {:ok, post} ->
+          dest =
+            Application.app_dir(:rocketchat, "priv/static/uploads")
+            |> Path.join(Path.basename(path) <> Path.extname(name))
+
+          File.cp!(path, dest)
+          {:ok, dest}
+      end)
+
+    case save_post(socket, socket.assigns.action, post_params) do
+      {:ok, post, message} ->
         notify_parent({:saved, post})
 
         {:noreply,
          socket
-         |> put_flash(:info, "Post updated successfully")
+         |> put_flash(:info, message)
          |> push_patch(to: socket.assigns.patch)}
 
       {:error, %Ecto.Changeset{} = changeset} ->
@@ -43,18 +53,15 @@ defmodule RocketchatWeb.PostLive.FormComponent do
     end
   end
 
-  defp save_post(socket, :new, post_params) do
-    case Blog.create_post(post_params) do
-      {:ok, post} ->
-        notify_parent({:saved, post})
+  defp save_post(socket, :edit, post_params) do
+    with {:ok, post} <- Blog.update_post(socket.assigns.post, post_params) do
+      {:ok, post, "Post updated successfully"}
+    end
+  end
 
-        {:noreply,
-         socket
-         |> put_flash(:info, "Post created successfully")
-         |> push_patch(to: socket.assigns.patch)}
-
-      {:error, %Ecto.Changeset{} = changeset} ->
-        {:noreply, assign_form(socket, changeset)}
+  defp save_post(_socket, :new, post_params) do
+    with {:ok, post} <- Blog.create_post(post_params) do
+      {:ok, post, "Post created successfully"}
     end
   end
 
@@ -85,6 +92,7 @@ defmodule RocketchatWeb.PostLive.FormComponent do
         <:actions>
           <.button phx-disable-with="Saving...">Save Post</.button>
         </:actions>
+        <.image_upload upload={@uploads.image} />
       </.simple_form>
     </div>
     """
