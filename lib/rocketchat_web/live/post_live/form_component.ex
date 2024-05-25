@@ -25,21 +25,9 @@ defmodule RocketchatWeb.PostLive.FormComponent do
   end
 
   def handle_event("save", %{"post" => post_params}, socket) do
-    _uploaded_files =
-      consume_uploaded_entries(socket, :image, fn
-        %{path: path}, %Phoenix.LiveView.UploadEntry{client_name: name} ->
-          dest_dir = Application.app_dir(:rocketchat, "priv/static/uploads") |> IO.inspect()
-          :ok = File.mkdir_p(dest_dir)
+    file = get_uploaded_file(socket)
 
-          dest =
-            Application.app_dir(:rocketchat, "priv/static/uploads")
-            |> Path.join(Path.basename(path) <> Path.extname(name))
-
-          File.cp!(path, dest)
-          {:ok, dest}
-      end)
-
-    case save_post(socket, socket.assigns.action, post_params) do
+    case save_post(socket, socket.assigns.action, Map.put(post_params, "image_key", file)) do
       {:ok, post, message} ->
         notify_parent({:saved, post})
 
@@ -53,14 +41,14 @@ defmodule RocketchatWeb.PostLive.FormComponent do
     end
   end
 
-  defp save_post(socket, :edit, post_params) do
-    with {:ok, post} <- Blog.update_post(socket.assigns.post, post_params) do
+  defp save_post(socket, :edit, changes) do
+    with {:ok, post} <- Blog.update_post(socket.assigns.post, changes) do
       {:ok, post, "Post updated successfully"}
     end
   end
 
-  defp save_post(_socket, :new, post_params) do
-    with {:ok, post} <- Blog.create_post(post_params) do
+  defp save_post(_socket, :new, changes) do
+    with {:ok, post} <- Blog.create_post(changes) do
       {:ok, post, "Post created successfully"}
     end
   end
@@ -70,6 +58,24 @@ defmodule RocketchatWeb.PostLive.FormComponent do
   end
 
   defp notify_parent(msg), do: send(self(), {__MODULE__, msg})
+
+  defp get_uploaded_file(socket) do
+    consume_uploaded_entries(socket, :image, fn
+      %{path: path}, %Phoenix.LiveView.UploadEntry{client_name: name} ->
+        dest_dir = Application.app_dir(:rocketchat, "priv/static/uploads") |> IO.inspect()
+        :ok = File.mkdir_p(dest_dir)
+
+        filename = Path.basename(path) <> Path.extname(name)
+
+        dest =
+          Application.app_dir(:rocketchat, "priv/static/uploads")
+          |> Path.join(filename)
+
+        File.cp!(path, dest)
+        {:ok, filename}
+    end)
+    |> List.first()
+  end
 
   @impl true
   def render(assigns) do

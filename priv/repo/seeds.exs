@@ -25,7 +25,7 @@ for i <- 1..10 do
   })
 end
 
-for c <- ?A..?Z, i <- 1..10 do
+for c <- ?A..?Z, i <- 1..3 do
   l = <<c::utf8>>
 
   Rocketchat.Blog.create_post(%{
