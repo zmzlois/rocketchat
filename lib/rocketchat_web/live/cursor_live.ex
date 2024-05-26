@@ -1,22 +1,48 @@
 defmodule RocketchatWeb.CursorLive do
   use RocketchatWeb, :live_view
-  alias LiveCursorsWeb.Presence
+  alias RocketchatWeb.Presence
+
+  @channel_topic "cursor_page"
 
   @impl true
   def mount(_params, _session, socket) do
-    {:ok,
-     socket
-     |> assign(:x, 0)
-     |> assign(:y, 0)
-     |> assign(:username, get_username(socket.assigns.current_user))}
+    username = get_username(socket.assigns.current_user)
+
+    Presence.track(
+      self(),
+      @channel_topic,
+      socket.id,
+      %{socket_id: socket.id, x: 0, y: 0, username: username}
+    )
+
+    RocketchatWeb.Endpoint.subscribe(@channel_topic)
+
+    users = get_users()
+
+    {:ok, socket |> assign(:users, users)}
   end
 
   @impl true
   def handle_event("mouse-move", %{"x" => x, "y" => y}, socket) do
-    {:noreply,
-     socket
-     |> assign(:x, x)
-     |> assign(:y, y)}
+    key = socket.id
+    payload = %{x: x, y: y}
+
+    meta =
+      with %{metas: [meta | _]} <- Presence.get_by_key(@channel_topic, key) do
+        Map.merge(meta, payload)
+      else
+        _ -> payload
+      end
+
+    Presence.update(self(), @channel_topic, key, meta)
+
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_info(%{event: "presence_diff"}, socket) do
+    users = get_users()
+    {:noreply, socket |> assign(users: users)}
   end
 
   @impl true
@@ -25,7 +51,6 @@ defmodule RocketchatWeb.CursorLive do
     <ul
       class="h-96 w-full group bg-neutral-200 overflow-hidden list-none"
       phx-hook="mouse-move"
-      data-move-throttle="100"
       id="cursor-board"
     >
       <svg class="sr-only">
@@ -56,13 +81,15 @@ defmodule RocketchatWeb.CursorLive do
           </linearGradient>
         </defs>
       </svg>
-      <li
-        style={"transform: translate(#{@x}px, #{@y}px);"}
-        class="flex flex-col group-phx-hook-loading:transition-transform duration-75 pointer-events-none whitespace-nowrap"
-      >
-        <svg class="size-8"><use href="#cursor" /></svg>
-        <span><%= @username %></span>
-      </li>
+      <%= for user <- @users do %>
+        <li
+          style={"transform: translate(#{user.x}px, #{user.y}px);"}
+          class="absolute flex flex-col pointer-events-none whitespace-nowrap"
+        >
+          <svg class="size-8"><use href="#cursor" /></svg>
+          <span><%= user.username %></span>
+        </li>
+      <% end %>
     </ul>
     """
   end
@@ -72,5 +99,10 @@ defmodule RocketchatWeb.CursorLive do
       [_, match] -> match
       _ -> "anon"
     end
+  end
+
+  defp get_users() do
+    Presence.list(@channel_topic)
+    |> Enum.map(fn {_, %{metas: meta}} -> List.last(meta) end)
   end
 end
