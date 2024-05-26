@@ -17,7 +17,8 @@ defmodule Rocketchat.Application do
       # Start a worker by calling: Rocketchat.Worker.start_link(arg)
       # {Rocketchat.Worker, arg},
       # Start to serve requests, typically the last entry
-      RocketchatWeb.Endpoint
+      RocketchatWeb.Endpoint,
+      RocketchatWeb.Presence
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

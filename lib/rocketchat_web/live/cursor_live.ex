@@ -1,5 +1,6 @@
 defmodule RocketchatWeb.CursorLive do
   use RocketchatWeb, :live_view
+  alias LiveCursorsWeb.Presence
 
   @impl true
   def mount(_params, _session, socket) do
