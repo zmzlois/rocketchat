@@ -6,7 +6,6 @@ defmodule RocketchatWeb.LiveHelpers do
   alias Pow.Store.Backend.EtsCache
 
   def on_mount(:default, _params, session, socket) do
-    IO.inspect("here")
     socket =
       assign_new(socket, :current_user, fn ->
         get_user(socket, session)
@@ -15,7 +14,7 @@ defmodule RocketchatWeb.LiveHelpers do
     if socket.assigns.current_user do
       {:cont, socket}
     else
-      {:halt, redirect(socket, to: "/login")}
+      {:halt, redirect(socket, to: "/")}
     end
   end
 
