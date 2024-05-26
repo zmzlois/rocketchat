@@ -3,6 +3,8 @@ defmodule RocketchatWeb.Router do
   use Pow.Phoenix.Router
   use PowAssent.Phoenix.Router
 
+  import Phoenix.LiveView.Router
+
   pipeline :browser do
     plug :accepts, ["html"]
     plug :fetch_session
@@ -61,6 +63,8 @@ defmodule RocketchatWeb.Router do
 
     live "/posts/:id", PostLive.Show, :show
     live "/posts/:id/show/edit", PostLive.Show, :edit
+
+    live "/feed", ThermostatLive
   end
 
   # Other scopes may use custom stacks.
