@@ -54,6 +54,11 @@ defmodule RocketchatWeb do
       use Phoenix.LiveView,
         layout: {RocketchatWeb.Layouts, :app}
 
+      # TODO: Figure out why the framework doesn't hit this method
+      IO.inspect("hitting RocketchatWeb.live_view/0")
+
+      # automatically assign `current_user`
+      on_mount RocketchatWeb.LiveHelpers
       unquote(html_helpers())
     end
   end
