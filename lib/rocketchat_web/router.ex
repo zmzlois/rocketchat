@@ -3,6 +3,8 @@ defmodule RocketchatWeb.Router do
   use Pow.Phoenix.Router
   use PowAssent.Phoenix.Router
 
+  import Phoenix.LiveView.Router
+
   pipeline :browser do
     plug :accepts, ["html"]
     plug :fetch_session
@@ -45,6 +47,8 @@ defmodule RocketchatWeb.Router do
     pipe_through [:browser, :protected]
 
     get "/", PageController, :home
+
+    live "/feed", FeedLive
   end
 
   # Other scopes may use custom stacks.
