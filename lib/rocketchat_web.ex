@@ -54,7 +54,6 @@ defmodule RocketchatWeb do
       use Phoenix.LiveView,
         layout: {RocketchatWeb.Layouts, :app}
 
-      # automatically assign `current_user`
       on_mount RocketchatWeb.LiveHelpers
       unquote(html_helpers())
     end
