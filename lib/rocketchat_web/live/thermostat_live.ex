@@ -1,21 +1,14 @@
 defmodule RocketchatWeb.ThermostatLive do
   use RocketchatWeb, :live_view
 
-  import RocketchatWeb.LiveHelpers
-
   @impl true
-  def mount(_params, session, socket) do
-    current_user = get_user(socket, session)
-    socket = assign(socket, :current_user, current_user)
-
+  def mount(_params, _session, socket) do
     temperature = 70
     {:ok, assign(socket, :temperature, temperature)}
   end
 
   @impl true
   def handle_event("inc_temperature", _params, socket) do
-    _current_user = socket.assigns.current_user
-
     {:noreply, update(socket, :temperature, &(&1 + 1))}
   end
 
