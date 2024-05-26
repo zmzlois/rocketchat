@@ -599,6 +599,36 @@ defmodule RocketchatWeb.CoreComponents do
     """
   end
 
+  def image_upload(assigns) do
+    assigns = assign(assigns, :entry, List.first(assigns.upload.entries))
+
+    ~H"""
+    <div>
+      <label class="size-24 rounded-full bg-neutral-400 overflow-hidden flex items-center justify-center">
+        <.live_file_input upload={@upload} class="sr-only" />
+        <%= case @entry do %>
+          <% nil -> %>
+            <span class="text-white">Image</span>
+          <% entry -> %>
+            <.live_img_preview entry={entry} class="size-full object-cover" />
+        <% end %>
+      </label>
+      <%= if @entry do %>
+        <progress value={@entry.progress} max="100"><%= @entry.progress %>%</progress>
+        <button
+          type="button"
+          phx-click="cancel-upload"
+          phx-value-ref={@entry.ref}
+          aria-label="cancel"
+          class="text-2xl"
+        >
+          &times;
+        </button>
+      <% end %>
+    </div>
+    """
+  end
+
   ## JS Commands
 
   def show(js \\ %JS{}, selector) do

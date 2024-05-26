@@ -18,9 +18,9 @@ defmodule RocketchatWeb.LiveHelpers do
     end
   end
 
-  def get_user(socket, session, config \\ [otp_app: :rocketchat])
+  defp get_user(socket, session, config \\ [otp_app: :rocketchat])
 
-  def get_user(socket, %{"rocketchat_auth" => signed_token}, config) do
+  defp get_user(socket, %{"rocketchat_auth" => signed_token}, config) do
     conn = struct!(Plug.Conn, secret_key_base: socket.endpoint.config(:secret_key_base))
     salt = Atom.to_string(Pow.Plug.Session)
 
@@ -32,5 +32,5 @@ defmodule RocketchatWeb.LiveHelpers do
     end
   end
 
-  def get_user(_, _, _), do: nil
+  defp get_user(_, _, _), do: nil
 end

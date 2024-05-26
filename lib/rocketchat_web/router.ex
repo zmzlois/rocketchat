@@ -12,6 +12,8 @@ defmodule RocketchatWeb.Router do
     plug :put_root_layout, html: {RocketchatWeb.Layouts, :root}
     plug :protect_from_forgery
     plug :put_secure_browser_headers
+    plug :fetch_current_user
+    plug :fetch_current_cart
   end
 
   pipeline :protected do
@@ -47,14 +49,56 @@ defmodule RocketchatWeb.Router do
     pipe_through [:browser, :protected]
 
     get "/", PageController, :home
+    resources "/products", ProductController
 
-    live "/feed", FeedLive
+    resources "/cart_items", CartItemController, only: [:create, :delete]
+    get "/cart", CartController, :show
+    put "/cart", CartController, :update
+
+    resources "/orders", OrderController, only: [:create, :show]
+
+    live "/posts", PostLive.Index, :index
+    live "/posts/new", PostLive.Index, :new
+    live "/posts/:id/edit", PostLive.Index, :edit
+
+    live "/posts/:id", PostLive.Show, :show
+    live "/posts/:id/show/edit", PostLive.Show, :edit
+
+    live "/thermo", ThermostatLive
+    live "/cursor", CursorLive
   end
 
   # Other scopes may use custom stacks.
   # scope "/api", RocketchatWeb do
   #   pipe_through :api
   # end
+
+  defp fetch_current_user(conn, _opts) do
+    case get_session(conn, :current_uuid) do
+      nil ->
+        new_uuid = Ecto.UUID.generate()
+
+        conn
+        |> assign(:current_uuid, new_uuid)
+        |> put_session(:current_uuid, new_uuid)
+
+      uuid ->
+        assign(conn, :current_uuid, uuid)
+    end
+  end
+
+  defp fetch_current_cart(conn, _opts) do
+    alias Rocketchat.ShoppingCart
+
+    cart_id = conn.assigns.current_uuid
+
+    if cart = ShoppingCart.get_cart_by_user_uuid(cart_id) do
+      assign(conn, :cart, cart)
+    else
+      {:ok, new_cart} = ShoppingCart.create_cart(cart_id)
+      assign(conn, :cart, new_cart)
+    end
+  end
 
   # Enable LiveDashboard and Swoosh mailbox preview in development
   if Application.compile_env(:rocketchat, :dev_routes) do
