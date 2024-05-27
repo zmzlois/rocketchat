@@ -13,6 +13,9 @@ module.exports = {
         brand: "#FD4F00",
       },
     },
+    fontFamily: {
+     'spacemonkey': ["SpaceMonkey"],
+    },
   },
   plugins: [
     require("@tailwindcss/forms"),

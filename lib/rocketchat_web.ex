@@ -51,8 +51,8 @@ defmodule RocketchatWeb do
 
   def live_view do
     quote do
-      use Phoenix.LiveView,
-        layout: {RocketchatWeb.Layouts, :app}
+      use Phoenix.LiveView
+        #layout: {RocketchatWeb.Layouts, :app}
 
       on_mount RocketchatWeb.LiveHelpers
       unquote(html_helpers())
