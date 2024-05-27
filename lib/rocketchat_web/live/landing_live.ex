@@ -63,6 +63,7 @@ defmodule RocketchatWeb.LandingLive do
             v<%= Application.spec(:phoenix, :vsn) %>
           </small>
         </h1>
+        <.live_component module={RocketchatWeb.RecordButton} id="audio-recorder" />
         <p class="text-[2rem] mt-4 font-semibold leading-10 tracking-tighter text-zinc-900 text-balance">
           Peace of mind from prototype to production.
         </p>
