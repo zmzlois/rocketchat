@@ -49,10 +49,11 @@ defmodule RocketchatWeb.Endpoint do
   plug Plug.MethodOverride
   plug Plug.Head
   plug Plug.Session, @session_options
+
   plug Plug.Session,
-  store: :cookie,
-  key: "_rocketchat_key",
-  signing_salt: "JqjkPIe0"
+    store: :cookie,
+    key: "_rocketchat_key",
+    signing_salt: "JqjkPIe0"
 
   plug Pow.Plug.Session, otp_app: :rocketchat
   plug RocketchatWeb.Router

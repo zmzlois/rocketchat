@@ -67,7 +67,6 @@ defmodule RocketchatWeb.Router do
     live "/thermo", ThermostatLive
     live "/cursor", CursorLive
 
-
     live "/feed", FeedLive
   end
 
