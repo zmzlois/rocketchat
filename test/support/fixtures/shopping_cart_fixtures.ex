@@ -3,12 +3,13 @@ defmodule Rocketchat.ShoppingCartFixtures do
   This module defines test helpers for creating
   entities via the `Rocketchat.ShoppingCart` context.
   """
+  alias Ecto.UUID
 
   @doc """
   Generate a unique cart user_uuid.
   """
   def unique_cart_user_uuid do
-    raise "implement the logic to generate a unique cart user_uuid"
+    UUID.generate()
   end
 
   @doc """
