@@ -71,7 +71,7 @@ defmodule RocketchatWeb.FeedComponents do
           <.search_icon />
         </div>
       </button>
-      <button class="rounded-full border-8 border-white bg-black relative p-4 relative -top-3">
+      <button class="rounded-full border-8 border-white bg-black p-4 relative -top-3">
         <div class="h-6 w-6 shadow-xl relative">
           <img src="https://i.imgur.com/RAw6gOc.png" class="absolute" />
         </div>
