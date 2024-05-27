@@ -48,7 +48,6 @@ defmodule RocketchatWeb.Router do
   scope "/", RocketchatWeb do
     pipe_through [:browser, :protected]
 
-    get "/", PageController, :home
     resources "/products", ProductController
 
     resources "/cart_items", CartItemController, only: [:create, :delete]
@@ -57,6 +56,7 @@ defmodule RocketchatWeb.Router do
 
     resources "/orders", OrderController, only: [:create, :show]
 
+    live "/", LandingLive
     live "/posts", PostLive.Index, :index
     live "/posts/new", PostLive.Index, :new
     live "/posts/:id/edit", PostLive.Index, :edit
