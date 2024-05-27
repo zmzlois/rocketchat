@@ -14,13 +14,13 @@ type HookContext = {
   /** Method to handle an event pushed from the server. */
   handleEvent(event, callback: (paylod) => void): void;
   /** Method to inject a list of file-like objects into an uploader. */
-  upload(name: string, files: File[]): void;
+  upload(name: string, files: Blob[]): void;
   /** Method to inject a list of file-like objects into an uploader. The hook will send the files to the uploader with name defined by `Phoenix.LiveView.allow_upload/3` on the server-side.
    *
    * Dispatching new uploads triggers an input change event which will be sent to the LiveComponent or LiveView the `selectorOrTarget` is defined in, where its value can be either a query selector or an actual DOM element.
    *
    * If the query selector returns more than one live file input, an error will be logged. */
-  uploadTo(selectorOrTarget: string | Element, name: string, files: File[]): void;
+  uploadTo(selectorOrTarget: string | Element, name: string, files: Blob[]): void;
 };
 
 export type Hook = {
