@@ -30,12 +30,13 @@ defmodule RocketchatWeb.RecordButton do
   @impl true
   def render(assigns) do
     ~H"""
-    <form phx-submit="recorded" phx-target={@myself}>
+    <form phx-submit="recorded" phx-target={@myself} class="flex flex-col items-center p-2">
       <button
         id="audio-recorder"
         type="button"
         phx-hook="record-audio"
         data-upload-name={@uploads.audio.name}
+        class="font-bold uppercase text-2xl bg-red-400 text-white p-2 rounded-lg"
       >
         record
       </button>
