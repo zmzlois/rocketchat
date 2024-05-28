@@ -62,7 +62,7 @@ defmodule RocketchatWeb.PostLive.FormComponent do
   defp get_uploaded_file(socket) do
     consume_uploaded_entries(socket, :image, fn
       %{path: path}, %Phoenix.LiveView.UploadEntry{client_name: name} ->
-        dest_dir = Application.app_dir(:rocketchat, "priv/static/uploads")
+        dest_dir = Application.app_dir(:rocketchat, "priv/static/uploads/post_image")
         :ok = File.mkdir_p(dest_dir)
 
         filename = Path.basename(path) <> Path.extname(name)

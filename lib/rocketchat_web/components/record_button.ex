@@ -9,8 +9,12 @@ defmodule RocketchatWeb.RecordButton do
   @impl true
   def handle_event("recorded", _params, socket) do
     consume_uploaded_entries(socket, :audio, fn
-      %{path: path}, %Phoenix.LiveView.UploadEntry{client_name: name} ->
-        IO.inspect({path, name})
+      %{path: path}, %Phoenix.LiveView.UploadEntry{} ->
+        dest_dir = Application.app_dir(:rocketchat, "priv/static/uploads/voice_message")
+        :ok = File.mkdir_p(dest_dir)
+        filename = Path.basename(path)
+        dest = dest_dir |> Path.join(filename)
+        File.cp!(path, dest)
         {:ok, nil}
     end)
 
