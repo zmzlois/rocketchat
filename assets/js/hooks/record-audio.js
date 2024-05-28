@@ -22,6 +22,7 @@ export const recordAudio = {
         .then(stream => {
           recorder = new MediaRecorder(stream);
           recorder.start();
+          this.pushEventTo(element, "recording");
 
           recorder.addEventListener(
             "dataavailable",
