@@ -3,19 +3,16 @@ defmodule RocketchatWeb.RecordButton do
 
   @impl true
   def mount(socket) do
-    {:ok, socket |> allow_upload(:audio, accept: ~w"audio/*"), layout: false}
+    {:ok, socket |> allow_upload(:audio, accept: ~w"audio/*", auto_upload: true), layout: false}
   end
 
   @impl true
   def handle_event("recorded", _params, socket) do
-    IO.puts("recorded")
-
-    {:noreply, socket}
-  end
-
-  def handle_event("save", _params, socket) do
-    IO.inspect("save")
-    socket.assigns.uploads.audio.entries |> IO.inspect()
+    consume_uploaded_entries(socket, :audio, fn
+      %{path: path}, %Phoenix.LiveView.UploadEntry{client_name: name} ->
+        IO.inspect({path, name})
+        {:ok, nil}
+    end)
 
     {:noreply, socket}
   end
@@ -29,11 +26,17 @@ defmodule RocketchatWeb.RecordButton do
   @impl true
   def render(assigns) do
     ~H"""
-    <form phx-submit="save" phx-target={@myself}>
-      <button type="button" phx-hook="record-audio" id="audio-recorder">
+    <form phx-submit="recorded" phx-target={@myself}>
+      <button
+        id="audio-recorder"
+        type="button"
+        phx-hook="record-audio"
+        data-upload-name={@uploads.audio.name}
+      >
         record
       </button>
-      <.live_file_input upload={@uploads.audio} phx-change="recorded" class="sr-only" />
+      <%!-- doesn't work w/o phx-change ¯\_(ツ)_/¯ --%>
+      <.live_file_input upload={@uploads.audio} phx-change="_" class="sr-only" />
     </form>
     """
   end

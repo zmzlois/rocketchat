@@ -3,12 +3,16 @@ export const recordAudio = {
   mounted() {
     const element = this.el;
     if (!(element instanceof HTMLElement)) return;
+    const { uploadName } = element.dataset;
+    if (!uploadName) {
+      throw new Error("Please set data-upload-name on the elemen with the proper upload name");
+    }
 
     /** @type {MediaRecorder | undefined} */
     let recorder;
 
     element.addEventListener("click", () => {
-      if (recorder && recorder.state === "recording") {
+      if (recorder?.state === "recording") {
         recorder.requestData();
         return;
       }
@@ -22,11 +26,15 @@ export const recordAudio = {
           recorder.addEventListener(
             "dataavailable",
             e => {
-              this.upload("audio", [e.data]);
+              this.upload(uploadName, [e.data]);
 
-              element.form?.requestSubmit();
+              // yes, I hate this too
+              setTimeout(() => {
+                element.form?.requestSubmit();
+              }, 150);
 
               stream.getTracks().forEach(t => t.stop());
+              recorder = undefined;
             },
             { once: true }
           );
