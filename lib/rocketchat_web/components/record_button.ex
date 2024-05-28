@@ -29,12 +29,6 @@ defmodule RocketchatWeb.RecordButton do
     {:noreply, socket |> assign(recording?: false)}
   end
 
-  def handle_event(e, _params, socket) do
-    IO.inspect({e})
-
-    {:noreply, socket}
-  end
-
   @impl true
   def render(assigns) do
     ~H"""
