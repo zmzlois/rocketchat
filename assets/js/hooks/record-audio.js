@@ -3,10 +3,6 @@ export const recordAudio = {
   mounted() {
     const element = this.el;
     if (!(element instanceof HTMLElement)) return;
-    const { uploadName } = element.dataset;
-    if (!uploadName) {
-      throw new Error("Please set data-upload-name on the elemen with the proper upload name");
-    }
 
     /** @type {MediaRecorder | undefined} */
     let recorder;
@@ -17,6 +13,7 @@ export const recordAudio = {
         return;
       }
 
+      const { uploadName, maxDuration } = getRecordConfig(element);
       navigator.mediaDevices
         .getUserMedia({ audio: true, video: false })
         .then(stream => {
@@ -24,9 +21,15 @@ export const recordAudio = {
           recorder.start();
           this.pushEventTo(element, "recording");
 
+          const timeout = setTimeout(() => {
+            if (!recorder) return;
+            recorder.requestData();
+          }, maxDuration * 1000);
+
           recorder.addEventListener(
             "dataavailable",
             e => {
+              clearTimeout(timeout);
               this.upload(uploadName, [e.data]);
 
               // yes, I hate this too
@@ -44,3 +47,21 @@ export const recordAudio = {
     });
   },
 };
+
+/**
+ *
+ * @param {HTMLElement} element
+ */
+function getRecordConfig(element) {
+  const { uploadName, maxDuration } = element.dataset;
+  if (!uploadName) {
+    throw new Error("Please set data-upload-name on the element with the proper upload name");
+  }
+  if (!maxDuration) {
+    throw new Error(
+      "Please set data-max-duration on the element with the proper max recording duration in seconds"
+    );
+  }
+
+  return { uploadName, maxDuration: +maxDuration };
+}

@@ -15,6 +15,10 @@ defmodule RocketchatWeb.RecordButton do
   end
 
   def handle_event("recorded", _params, socket) do
+    {:noreply, socket |> assign(recording?: false)}
+  end
+
+  def handle_event("uploaded", _params, socket) do
     consume_uploaded_entries(socket, :audio, fn
       %{path: path}, %Phoenix.LiveView.UploadEntry{} ->
         dest_dir = Application.app_dir(:rocketchat, "priv/static/uploads/voice_message")
@@ -26,19 +30,20 @@ defmodule RocketchatWeb.RecordButton do
         {:ok, nil}
     end)
 
-    {:noreply, socket |> assign(recording?: false)}
+    {:noreply, socket}
   end
 
   @impl true
   def render(assigns) do
     ~H"""
-    <form phx-submit="recorded" phx-target={@myself} class="flex flex-col items-center p-2">
+    <form phx-submit="uploaded" phx-target={@myself} class="flex flex-col items-center p-2">
       <button
         id="audio-recorder"
         type="button"
         phx-hook="record-audio"
         data-upload-name={@uploads.audio.name}
-        class="font-bold uppercase text-2xl bg-red-400 text-white p-2 rounded-lg"
+        data-max-duration={5 * 60}
+        class="font-bold uppercase text-2xl bg-red-400 text-white p-2 rounded-lg disabled:bg-neutral-400 transition-colors"
       >
         <%= if @recording? do %>
           recording
@@ -47,7 +52,7 @@ defmodule RocketchatWeb.RecordButton do
         <% end %>
       </button>
       <%!-- doesn't work w/o phx-change ¯\_(ツ)_/¯ --%>
-      <.live_file_input upload={@uploads.audio} phx-change="_" class="sr-only" />
+      <.live_file_input upload={@uploads.audio} phx-change="recorded" class="sr-only" />
     </form>
     """
   end
