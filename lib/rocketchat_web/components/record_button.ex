@@ -1,12 +1,14 @@
 defmodule RocketchatWeb.RecordButton do
   use RocketchatWeb, :live_component
+  # #todo - how to avoid yucky settimeout for submission
+  ## assign_uploads has progress callback - save recording there instead of submit
+  ## replace button type with submit when starting the recording?
 
   @impl true
   def mount(socket) do
     {:ok,
      socket
      |> assign(recording?: false)
-     # todo - try progress callback to save recording instead of submit
      |> allow_upload(:audio,
        accept: ~w"audio/*",
        auto_upload: true,
@@ -48,7 +50,7 @@ defmodule RocketchatWeb.RecordButton do
         type="button"
         phx-hook="record-audio"
         data-upload-name={@uploads.audio.name}
-        data-max-duration={5 * 60}
+        data-max-duration={60}
         class="font-bold uppercase text-2xl bg-red-400 text-white p-2 rounded-lg disabled:bg-neutral-400 transition-colors"
       >
         <%= if @recording? do %>
