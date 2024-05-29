@@ -6,7 +6,13 @@ defmodule RocketchatWeb.RecordButton do
     {:ok,
      socket
      |> assign(recording?: false)
-     |> allow_upload(:audio, accept: ~w"audio/*", auto_upload: true), layout: false}
+     # todo - try progress callback to save recording instead of submit
+     |> allow_upload(:audio,
+       accept: ~w"audio/*",
+       auto_upload: true,
+       # 25MB is Minio limit
+       max_file_size: 25 * 1024 * 1024
+     ), layout: false}
   end
 
   @impl true
@@ -53,6 +59,11 @@ defmodule RocketchatWeb.RecordButton do
       </button>
       <%!-- doesn't work w/o phx-change ¯\_(ツ)_/¯ --%>
       <.live_file_input upload={@uploads.audio} phx-change="recorded" class="sr-only" />
+      <%= for entry <- @uploads.audio.entries do %>
+        <%= for error <- upload_errors(@uploads.audio, entry) do %>
+          <%= error %>
+        <% end %>
+      <% end %>
     </form>
     """
   end
