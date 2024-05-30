@@ -14,7 +14,7 @@ defmodule Rocketchat.Posts.Like do
   @doc false
   def changeset(like, attrs) do
     like
-    |> cast(attrs, [])
-    |> validate_required([])
+    |> cast(attrs, [:hidden?])
+    |> validate_required([:hidden?])
   end
 end

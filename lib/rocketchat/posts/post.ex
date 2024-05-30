@@ -18,7 +18,7 @@ defmodule Rocketchat.Posts.Post do
   @doc false
   def changeset(post, attrs) do
     post
-    |> cast(attrs, [])
-    |> validate_required([])
+    |> cast(attrs, [:content, :summary, :topic, :audio_key])
+    |> validate_required([:content, :audio_key])
   end
 end
