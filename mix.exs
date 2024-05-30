@@ -37,6 +37,7 @@ defmodule Rocketchat.MixProject do
       {:dialyxir, "~> 1.4", only: :dev, runtime: false},
       {:dotenvy, "~> 0.8"},
       {:ecto_sql, "~> 3.10"},
+      {:faker, "~> 0.18.0", only: :dev},
       {:postgrex, ">= 0.0.0"},
       {:phoenix_html, "~> 4.0"},
       {:phoenix_live_reload, "~> 1.2", only: :dev},
