@@ -3,14 +3,16 @@ defmodule Rocketchat.Posts.Post do
   import Ecto.Changeset
 
   schema "posts" do
-    belongs_to :users, Rocketchat.Users.User
+    belongs_to :user, Rocketchat.Users.User
 
     field :content
     field :summary
     field :topic
     field :audio_key
 
-    timestamps(type: :utc_datetime)
+    timestamps type: :utc_datetime
+
+    has_many :likes, Rocketchat.Posts.Like
   end
 
   @doc false

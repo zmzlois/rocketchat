@@ -9,19 +9,6 @@ defmodule Rocketchat.Posts do
   alias Rocketchat.Posts.Post
 
   @doc """
-  Returns the list of posts.
-
-  ## Examples
-
-      iex> list_posts()
-      [%Post{}, ...]
-
-  """
-  def list_posts do
-    Repo.all(Post)
-  end
-
-  @doc """
   Gets a single post.
 
   Raises `Ecto.NoResultsError` if the Post does not exist.
@@ -82,5 +69,70 @@ defmodule Rocketchat.Posts do
   """
   def change_post(%Post{} = post, attrs \\ %{}) do
     Post.changeset(post, attrs)
+  end
+
+  alias Rocketchat.Posts.Like
+
+  @doc """
+  Gets a single like.
+
+  Raises `Ecto.NoResultsError` if the Like does not exist.
+
+  ## Examples
+
+      iex> get_like!(123)
+      %Like{}
+
+      iex> get_like!(456)
+      ** (Ecto.NoResultsError)
+
+  """
+  def get_like!(id), do: Repo.get!(Like, id)
+
+  @doc """
+  Creates a like.
+
+  ## Examples
+
+      iex> create_like(%{field: value})
+      {:ok, %Like{}}
+
+      iex> create_like(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def create_like(attrs \\ %{}) do
+    %Like{}
+    |> change_like(attrs)
+    |> Repo.insert()
+  end
+
+  @doc """
+  Deletes a like.
+
+  ## Examples
+
+      iex> delete_like(like)
+      {:ok, %Like{}}
+
+      iex> delete_like(like)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def delete_like(%Like{} = like) do
+    Repo.delete(like)
+  end
+
+  @doc """
+  Returns an `%Ecto.Changeset{}` for tracking like changes.
+
+  ## Examples
+
+      iex> change_like(like)
+      %Ecto.Changeset{data: %Like{}}
+
+  """
+  def change_like(%Like{} = like, attrs \\ %{}) do
+    Like.changeset(like, attrs)
   end
 end

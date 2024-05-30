@@ -7,5 +7,8 @@ defmodule Rocketchat.Users.User do
     pow_user_fields()
 
     timestamps()
+
+    has_many :posts, Rocketchat.Posts.Post
+    has_many :likes, Rocketchat.Posts.Like
   end
 end
