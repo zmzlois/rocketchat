@@ -1,4 +1,4 @@
-defmodule RocketchatWeb.LiveHelpers do
+defmodule RocketchatWeb.Setup.Authorized do
   import Phoenix.LiveView
   import Phoenix.Component
 
