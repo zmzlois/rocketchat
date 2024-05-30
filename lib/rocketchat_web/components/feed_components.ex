@@ -33,6 +33,7 @@ defmodule RocketchatWeb.FeedComponents do
 
   attr :tab, :string, required: true
   attr :active?, :boolean, required: true
+
   slot :inner_block, required: true
 
   defp tab_button(assigns) do
