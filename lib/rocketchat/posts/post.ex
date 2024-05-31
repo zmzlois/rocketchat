@@ -4,6 +4,7 @@ defmodule Rocketchat.Posts.Post do
 
   schema "posts" do
     belongs_to :user, Rocketchat.Users.User, foreign_key: :author_id
+    belongs_to :quoted_post, Rocketchat.Posts.Post, foreign_key: :quoted_post_id
 
     field :content
     field :summary
@@ -14,6 +15,7 @@ defmodule Rocketchat.Posts.Post do
 
     has_many :likes, Rocketchat.Posts.Like
     has_many :reposts, Rocketchat.Posts.Repost
+    has_many :quotes, Rocketchat.Posts.Post
   end
 
   @doc false

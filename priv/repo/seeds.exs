@@ -20,6 +20,7 @@ defmodule Seed do
     seed_posts(post_count)
     seed_likes(post_count * 5)
     seed_reposts(post_count * 2)
+    seed_quotes(post_count)
   end
 
   defp seed_users(count) when is_integer(count) do
@@ -30,15 +31,15 @@ defmodule Seed do
       }
     )
     |> insert_all()
+
+    DataProvider.update(Rocketchat.Users.User)
   end
 
   defp seed_posts(count) when is_integer(count) do
-    get_random_user = random_entity_generator(Rocketchat.Users.User)
-
     for(
       _ <- 1..count,
       do: %Rocketchat.Posts.Post{
-        author_id: get_random_user.().id,
+        user: DataProvider.get_random_row(Rocketchat.Users.User),
         content: Faker.Lorem.paragraph(),
         summary: maybe(&Faker.Lorem.paragraph/0),
         audio_key: Faker.UUID.v4(),
@@ -46,34 +47,53 @@ defmodule Seed do
       }
     )
     |> insert_all()
+
+    DataProvider.update(Rocketchat.Posts.Post)
   end
 
   defp seed_likes(count) when is_integer(count) do
-    get_random_user = random_entity_generator(Rocketchat.Users.User)
-    get_random_post = random_entity_generator(Rocketchat.Posts.Post)
-
     for(
       _ <- 1..count,
       do: %Rocketchat.Posts.Like{
-        user: get_random_user.(),
-        post: get_random_post.()
+        user: DataProvider.get_random_row(Rocketchat.Users.User),
+        post: DataProvider.get_random_row(Rocketchat.Posts.Post)
       }
     )
     |> insert_all(on_conflict: :nothing)
   end
 
   defp seed_reposts(count) when is_integer(count) do
-    get_random_user = random_entity_generator(Rocketchat.Users.User)
-    get_random_post = random_entity_generator(Rocketchat.Posts.Post)
-
     for(
       _ <- 1..count,
       do: %Rocketchat.Posts.Repost{
-        user: get_random_user.(),
-        post: get_random_post.()
+        user: DataProvider.get_random_row(Rocketchat.Users.User),
+        post: DataProvider.get_random_row(Rocketchat.Posts.Post)
       }
     )
     |> insert_all(on_conflict: :nothing)
+  end
+
+  defp seed_quotes(count) when is_integer(count) do
+    for(
+      _ <- 1..count,
+      do: %Rocketchat.Posts.Post{
+        create_post()
+        | quoted_post: DataProvider.get_random_row(Rocketchat.Posts.Post)
+      }
+    )
+    |> insert_all()
+
+    DataProvider.update(Rocketchat.Posts.Post)
+  end
+
+  defp create_post do
+    %Rocketchat.Posts.Post{
+      user: DataProvider.get_random_row(Rocketchat.Users.User),
+      content: Faker.Lorem.paragraph(),
+      summary: maybe(&Faker.Lorem.paragraph/0),
+      audio_key: Faker.UUID.v4(),
+      topic: maybe(&Faker.Company.buzzword/0)
+    }
   end
 
   defp maybe(generator) when is_function(generator) do
@@ -81,11 +101,6 @@ defmodule Seed do
       0 -> nil
       1 -> generator.()
     end
-  end
-
-  defp random_entity_generator(entity) do
-    entities = Repo.all(entity)
-    fn -> Enum.random(entities) end
   end
 
   @doc """
@@ -100,6 +115,38 @@ defmodule Seed do
     values
     |> Task.async_stream(&Repo.insert!(&1, opts))
     |> Enum.to_list()
+  end
+end
+
+defmodule DataProvider do
+  @doc """
+  Refetches all rows for the specified schema
+  """
+  def update(repo) when is_atom(repo) do
+    ensure_provider_started(repo)
+
+    Agent.update(repo, fn _ -> Repo.all(repo) end)
+  end
+
+  @doc """
+  Fetches a single random row from specified schema or nil if there are none
+  """
+  def get_random_row(repo) when is_atom(repo) do
+    ensure_provider_started(repo)
+    Agent.get(repo, &random/1)
+  end
+
+  defp ensure_provider_started(repo) when is_atom(repo) do
+    if !Process.whereis(repo) do
+      Agent.start_link(fn -> Repo.all(repo) end, name: repo)
+    end
+  end
+
+  defp random(enum) do
+    case enum do
+      [] -> nil
+      v -> Enum.random(v)
+    end
   end
 end
 
