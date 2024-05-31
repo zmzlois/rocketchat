@@ -12,7 +12,11 @@
 
 alias Rocketchat.Repo
 
+# todo - created_at should be random, not now
+
 defmodule Seed do
+  alias Rocketchat.{Users, Posts}
+
   def seed do
     seed_users(50)
 
@@ -24,71 +28,61 @@ defmodule Seed do
   end
 
   defp seed_users(count) when is_integer(count) do
-    for(
-      _ <- 1..count,
-      do: %Rocketchat.Users.User{
-        email: Faker.Internet.email()
-      }
-    )
+    for _ <- 1..count do
+      %Users.User{email: Faker.Internet.email()}
+    end
     |> insert_all()
 
-    DataProvider.update(Rocketchat.Users.User)
+    DataProvider.update(Users.User)
   end
 
   defp seed_posts(count) when is_integer(count) do
-    for(
-      _ <- 1..count,
-      do: %Rocketchat.Posts.Post{
-        user: DataProvider.get_random_row(Rocketchat.Users.User),
+    for _ <- 1..count do
+      %Posts.Post{
+        user: DataProvider.get_random_row(Users.User),
         content: Faker.Lorem.paragraph(),
         summary: maybe(&Faker.Lorem.paragraph/0),
         audio_key: Faker.UUID.v4(),
         topic: maybe(&Faker.Company.buzzword/0)
       }
-    )
+    end
     |> insert_all()
 
-    DataProvider.update(Rocketchat.Posts.Post)
+    DataProvider.update(Posts.Post)
   end
 
   defp seed_likes(count) when is_integer(count) do
-    for(
-      _ <- 1..count,
-      do: %Rocketchat.Posts.Like{
-        user: DataProvider.get_random_row(Rocketchat.Users.User),
-        post: DataProvider.get_random_row(Rocketchat.Posts.Post)
+    for _ <- 1..count do
+      %Posts.Like{
+        user: DataProvider.get_random_row(Users.User),
+        post: DataProvider.get_random_row(Posts.Post)
       }
-    )
+    end
     |> insert_all(on_conflict: :nothing)
   end
 
   defp seed_reposts(count) when is_integer(count) do
-    for(
-      _ <- 1..count,
-      do: %Rocketchat.Posts.Repost{
-        user: DataProvider.get_random_row(Rocketchat.Users.User),
-        post: DataProvider.get_random_row(Rocketchat.Posts.Post)
+    for _ <- 1..count do
+      %Posts.Repost{
+        user: DataProvider.get_random_row(Users.User),
+        post: DataProvider.get_random_row(Posts.Post)
       }
-    )
+    end
     |> insert_all(on_conflict: :nothing)
   end
 
   defp seed_quotes(count) when is_integer(count) do
-    for(
-      _ <- 1..count,
-      do: %Rocketchat.Posts.Post{
-        create_post()
-        | quoted_post: DataProvider.get_random_row(Rocketchat.Posts.Post)
-      }
-    )
+    for _ <- 1..count do
+      %Posts.Post{create_post() | quoted_post: DataProvider.get_random_row(Posts.Post)}
+    end
     |> insert_all()
 
-    DataProvider.update(Rocketchat.Posts.Post)
+    DataProvider.update(Posts.Post)
   end
 
   defp create_post do
-    %Rocketchat.Posts.Post{
-      user: DataProvider.get_random_row(Rocketchat.Users.User),
+    %Posts.Post{
+      user: DataProvider.get_random_row(Users.User),
       content: Faker.Lorem.paragraph(),
       summary: maybe(&Faker.Lorem.paragraph/0),
       audio_key: Faker.UUID.v4(),
