@@ -8,8 +8,8 @@ defmodule Rocketchat.Users.User do
 
     timestamps()
 
-    has_many :posts, Rocketchat.Posts.Post
-    has_many :reposts, Rocketchat.Posts.Repost
+    has_many :posts, Rocketchat.Posts.Post, foreign_key: :author_id
+    has_many :reposts, Rocketchat.Posts.Repost, foreign_key: :author_id
     has_many :likes, Rocketchat.Posts.Like
   end
 end
