@@ -19,6 +19,7 @@ defmodule Seed do
     post_count = 500
     seed_posts(post_count)
     seed_likes(post_count * 5)
+    seed_reposts(post_count * 2)
   end
 
   defp seed_users(count) when is_integer(count) do
@@ -54,6 +55,20 @@ defmodule Seed do
     for(
       _ <- 1..count,
       do: %Rocketchat.Posts.Like{
+        user: get_random_user.(),
+        post: get_random_post.()
+      }
+    )
+    |> insert_all(on_conflict: :nothing)
+  end
+
+  defp seed_reposts(count) when is_integer(count) do
+    get_random_user = random_entity_generator(Rocketchat.Users.User)
+    get_random_post = random_entity_generator(Rocketchat.Posts.Post)
+
+    for(
+      _ <- 1..count,
+      do: %Rocketchat.Posts.Repost{
         user: get_random_user.(),
         post: get_random_post.()
       }

@@ -135,4 +135,69 @@ defmodule Rocketchat.Posts do
   def change_like(%Like{} = like, attrs \\ %{}) do
     Like.changeset(like, attrs)
   end
+
+  alias Rocketchat.Posts.Repost
+
+  @doc """
+  Gets a single repost.
+
+  Raises `Ecto.NoResultsError` if the Repost does not exist.
+
+  ## Examples
+
+      iex> get_repost!(123)
+      %Repost{}
+
+      iex> get_repost!(456)
+      ** (Ecto.NoResultsError)
+
+  """
+  def get_repost!(id), do: Repo.get!(Repost, id)
+
+  @doc """
+  Creates a repost.
+
+  ## Examples
+
+      iex> create_repost(%{field: value})
+      {:ok, %Repost{}}
+
+      iex> create_repost(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def create_repost(attrs \\ %{}) do
+    %Repost{}
+    |> change_repost(attrs)
+    |> Repo.insert()
+  end
+
+  @doc """
+  Deletes a repost.
+
+  ## Examples
+
+      iex> delete_repost(repost)
+      {:ok, %Repost{}}
+
+      iex> delete_repost(repost)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def delete_repost(%Repost{} = repost) do
+    Repo.delete(repost)
+  end
+
+  @doc """
+  Returns an `%Ecto.Changeset{}` for tracking repost changes.
+
+  ## Examples
+
+      iex> change_repost(repost)
+      %Ecto.Changeset{data: %Repost{}}
+
+  """
+  def change_repost(%Repost{} = repost, attrs \\ %{}) do
+    Repost.changeset(repost, attrs)
+  end
 end

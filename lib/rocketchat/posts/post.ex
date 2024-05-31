@@ -13,6 +13,7 @@ defmodule Rocketchat.Posts.Post do
     timestamps type: :utc_datetime
 
     has_many :likes, Rocketchat.Posts.Like
+    has_many :reposts, Rocketchat.Posts.Repost
   end
 
   @doc false
