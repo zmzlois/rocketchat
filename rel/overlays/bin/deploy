@@ -2,5 +2,5 @@
 set -eu
 cd -P -- "$(dirname -- "$0")"
 
-./rocketchat eval Rocketchat.Release.migrate &
-PHX_SERVER=true exec ./rocketchat start
+./migrate &
+exec ./server
