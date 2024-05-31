@@ -1,12 +1,13 @@
-defmodule RocketchatWeb.PageHTML do
-  @moduledoc """
-  This module contains pages rendered by PageController.
+defmodule RocketchatWeb.LandingLive do
+  use RocketchatWeb, :live_view
 
-  See the `page_html` directory for all templates available.
-  """
-  use RocketchatWeb, :html
+  @impl true
+  def mount(_params, _session, socket) do
+    {:ok, socket, layout: false}
+  end
 
-  def home(assigns) do
+  @impl true
+  def render(assigns) do
     ~H"""
     <.flash_group flash={@flash} />
     <div class="left-[40rem] fixed inset-y-0 right-0 z-0 hidden lg:block xl:left-[50rem]">
@@ -62,6 +63,7 @@ defmodule RocketchatWeb.PageHTML do
             v<%= Application.spec(:phoenix, :vsn) %>
           </small>
         </h1>
+        <.live_component module={RocketchatWeb.RecordButton} id="audio-recorder" />
         <p class="text-[2rem] mt-4 font-semibold leading-10 tracking-tighter text-zinc-900 text-balance">
           Peace of mind from prototype to production.
         </p>

@@ -21,28 +21,7 @@ import "phoenix_html";
 import { Socket } from "phoenix";
 import { LiveSocket } from "phoenix_live_view";
 import topbar from "../vendor/topbar";
-
-const hooks = {};
-hooks["mouse-move"] = {
-  mounted() {
-    /** @type {HTMLElement} */
-    const element = this.el;
-    const throttle = parseInt(element.dataset.moveThrottle);
-    const parsedThrottle = Number.isNaN(throttle) ? 0 : throttle;
-    let lastMove = 0;
-    element.addEventListener("pointermove", e => {
-      const now = performance.now();
-      const elapsed = now - lastMove;
-      if (elapsed < parsedThrottle) return;
-
-      lastMove = now;
-
-      const x = e.offsetX;
-      const y = e.offsetY;
-      this.pushEvent("mouse-move", { x, y });
-    });
-  },
-};
+import { hooks } from "./hooks";
 
 let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content");
 let liveSocket = new LiveSocket("/live", Socket, {

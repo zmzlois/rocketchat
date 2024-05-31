@@ -76,7 +76,7 @@ defmodule RocketchatWeb.PostLive.Index do
         <div class="flex gap-1 items-center">
           <img
             :if={post.image_key}
-            src={~p"/uploads/#{post.image_key}"}
+            src={~p"/uploads/post_image/#{post.image_key}"}
             class="size-10 rounded-full object-cover"
           />
           <span><%= post.title %></span>
