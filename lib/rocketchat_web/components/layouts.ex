@@ -16,6 +16,7 @@ defmodule RocketchatWeb.Layouts do
       <nav>
         <.link patch={~p"/"}>home</.link>
         <.link patch={~p"/feed"}>feed</.link>
+        <.link patch={~p"/test"}>test</.link>
       </nav>
     </header>
     <main class="px-4 py-20 sm:px-6 lg:px-8">

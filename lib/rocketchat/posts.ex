@@ -4,9 +4,16 @@ defmodule Rocketchat.Posts do
   """
 
   import Ecto.Query, warn: false
+  alias Rocketchat.Users
+  alias Ecto.Changeset
   alias Rocketchat.Repo
 
   alias Rocketchat.Posts.Post
+
+  def list_posts do
+    Repo.all(from p in Post, order_by: [desc: p.inserted_at, asc: p.id])
+    |> Repo.preload([:likes, :user, :quotes, quoted_post: [:user]])
+  end
 
   @doc """
   Gets a single post.
@@ -36,10 +43,15 @@ defmodule Rocketchat.Posts do
       {:error, %Ecto.Changeset{}}
 
   """
-  def create_post(attrs \\ %{}) do
-    %Post{}
-    |> change_post(attrs)
-    |> Repo.insert()
+  def create_post(attrs = %{user: %Users.User{}}) do
+    with {:ok, post} <-
+           %Post{}
+           |> change_post(attrs)
+           |> Changeset.put_assoc(:user, attrs.user)
+           |> Changeset.put_assoc(:quoted_post, attrs[:quoted_post])
+           |> Repo.insert() do
+      {:ok, Repo.preload(post, :quoted_post)}
+    end
   end
 
   @doc """
