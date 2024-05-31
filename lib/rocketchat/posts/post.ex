@@ -3,7 +3,7 @@ defmodule Rocketchat.Posts.Post do
   import Ecto.Changeset
 
   schema "posts" do
-    belongs_to :user, Rocketchat.Users.User
+    belongs_to :user, Rocketchat.Users.User, foreign_key: :author_id
 
     field :content
     field :summary
