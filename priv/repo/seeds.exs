@@ -15,16 +15,20 @@ alias Rocketchat.Repo
 # todo - created_at should be random, not now
 
 defmodule Seed do
+  alias Rocketchat.Chats.{Chat}
   alias Rocketchat.{Users, Posts}
 
-  def seed do
-    seed_users(50)
+  def seed(magnitude) when is_integer(magnitude) do
+    user_count = magnitude
+    seed_users(user_count)
 
-    post_count = 500
+    post_count = magnitude * 10
     seed_posts(post_count)
     seed_likes(post_count * 5)
     seed_quotes(post_count)
     seed_reposts(post_count * 2)
+
+    seed_chats(user_count, fn -> Faker.random_between(1, 5) end)
   end
 
   defp seed_users(count) when is_integer(count) do
@@ -80,6 +84,19 @@ defmodule Seed do
     DataProvider.update(Posts.Post)
   end
 
+  defp seed_chats(count, users_per_chat)
+       when is_integer(count) and is_function(users_per_chat, 0) do
+    for _ <- 1..count do
+      %Chat{
+        name: Faker.Cat.breed(),
+        users: DataProvider.get_random(Users.User, users_per_chat.())
+      }
+    end
+    |> insert_all(on_conflict: :nothing)
+
+    DataProvider.update(Chat)
+  end
+
   defp create_post do
     %Posts.Post{
       user: DataProvider.get_random_row(Users.User),
@@ -123,6 +140,22 @@ defmodule DataProvider do
   end
 
   @doc """
+  Fetches all rows from specified schema
+  """
+  def get_all(repo) when is_atom(repo) do
+    ensure_provider_started(repo)
+    Agent.get(repo, &Function.identity/1)
+  end
+
+  @doc """
+  Fetches a random rows from specified schema
+  """
+  def get_random(repo, count) when is_atom(repo) and is_integer(count) do
+    ensure_provider_started(repo)
+    Agent.get(repo, &Enum.take_random(&1, count))
+  end
+
+  @doc """
   Fetches a single random row from specified schema or nil if there are none
   """
   def get_random_row(repo) when is_atom(repo) do
@@ -144,4 +177,4 @@ defmodule DataProvider do
   end
 end
 
-Seed.seed()
+Seed.seed(50)
