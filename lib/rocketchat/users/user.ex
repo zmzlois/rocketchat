@@ -11,5 +11,7 @@ defmodule Rocketchat.Users.User do
     has_many :posts, Rocketchat.Posts.Post, foreign_key: :author_id
     has_many :reposts, Rocketchat.Posts.Repost, foreign_key: :author_id
     has_many :likes, Rocketchat.Posts.Like
+
+    many_to_many :chats, Rocketchat.Chats.Chat, join_through: "user_chats"
   end
 end
