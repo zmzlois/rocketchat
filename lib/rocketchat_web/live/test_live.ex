@@ -7,7 +7,7 @@ defmodule RocketchatWeb.TestLive do
   def mount(_params, _session, socket) do
     {:ok,
      socket
-     |> assign(new_post: Posts.change_post(%Post{}))
+     |> assign(new_post: Posts.change_post(%Post{}), quote: nil)
      |> stream(
        :posts,
        Posts.list_posts()
