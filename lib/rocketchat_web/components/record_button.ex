@@ -42,6 +42,10 @@ defmodule RocketchatWeb.RecordButton do
     {:noreply, socket}
   end
 
+  def handle_event(_, _, socket) do
+    {:noreply, socket}
+  end 
+
   @impl true
   def render(assigns) do
     ~H"""
