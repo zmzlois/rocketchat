@@ -44,13 +44,21 @@ defmodule Rocketchat.Posts do
 
   """
   def create_post(attrs = %{user: %Users.User{}}) do
+    quoted_post = attrs[:quoted_post]
+
+    post =
+      if quoted_post do
+        Ecto.build_assoc(quoted_post, :quotes)
+      else
+        %Post{}
+      end
+
     with {:ok, post} <-
-           %Post{}
+           post
            |> change_post(attrs)
            |> Changeset.put_assoc(:user, attrs.user)
-           |> Changeset.put_assoc(:quoted_post, attrs[:quoted_post])
            |> Repo.insert() do
-      {:ok, Repo.preload(post, :quoted_post)}
+      {:ok, Repo.preload(post, quoted_post: [:user])}
     end
   end
 

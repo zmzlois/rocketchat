@@ -19,21 +19,21 @@ defmodule RocketchatWeb.TestLive do
   @impl true
   def handle_event("post", %{"post" => post}, socket) do
     user = socket.assigns.current_user
-    quoted_id = socket.assigns[:quote]
+    quoted_post_id = socket.assigns[:quote]
 
     {:ok, post} =
       %{
         content: post["content"],
         audio_key: "_",
         user: user,
-        # todo - finish quotes
-        quoted_post: if(quoted_id, do: %Posts.Post{id: quoted_id})
+        quoted_post: quoted_post_id && %Posts.Post{id: quoted_post_id}
       }
       |> Posts.create_post()
 
     {:noreply,
      socket
-     |> stream_insert(:posts, %Posts.Post{post | user: user}, at: 0)}
+     |> stream_insert(:posts, %Posts.Post{post | user: user}, at: 0)
+     |> assign(:quote, nil)}
   end
 
   def handle_event("quote", %{"id" => id}, socket) do
