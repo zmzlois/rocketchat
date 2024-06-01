@@ -11,7 +11,29 @@ defmodule Rocketchat.Posts do
   alias Rocketchat.Posts.Post
 
   def list_posts do
-    Repo.all(from p in Post, order_by: [desc: p.inserted_at, asc: p.id])
+    alias Rocketchat.Posts.Repost
+    alias Users.User
+
+    posts_query =
+      from p in Post,
+        select: %{p | reposted_by: nil, posted_at: p.inserted_at}
+
+    reposts_query =
+      from r in Repost,
+        inner_join: p in Post,
+        on: r.post_id == p.id,
+        inner_join: u in User,
+        on: r.author_id == u.id,
+        select: %{p | reposted_by: u.email, posted_at: r.inserted_at}
+
+    union_query =
+      from p in posts_query,
+        union_all: ^reposts_query
+
+    from(p in subquery(union_query),
+      order_by: [desc: p.posted_at, asc: p.id]
+    )
+    |> Repo.all()
     |> Repo.preload([:likes, :user, :quotes, quoted_post: [:user]])
   end
 
@@ -186,10 +208,14 @@ defmodule Rocketchat.Posts do
       {:error, %Ecto.Changeset{}}
 
   """
-  def create_repost(attrs \\ %{}) do
-    %Repost{}
-    |> change_repost(attrs)
-    |> Repo.insert()
+  def create_repost(attrs = %{user: %Users.User{}, post: %Post{}}) do
+    with {:ok, repost} <-
+           Ecto.build_assoc(attrs.post, :reposts)
+           |> change_repost(attrs)
+           |> Changeset.put_assoc(:user, attrs.user)
+           |> Repo.insert() do
+      {:ok, Repo.preload(repost, post: [:user])}
+    end
   end
 
   @doc """

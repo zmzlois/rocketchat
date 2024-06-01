@@ -8,6 +8,7 @@ defmodule RocketchatWeb.TestLive do
     {:ok,
      socket
      |> assign(new_post: Posts.change_post(%Post{}))
+     # theres an issue with inserts cause reposts have an id of an original post but whatever
      |> stream(:posts, Posts.list_posts(), limit: 100)}
   end
 
@@ -18,7 +19,7 @@ defmodule RocketchatWeb.TestLive do
 
   @impl true
   def handle_event("post", %{"post" => post}, socket) do
-    user = socket.assigns.current_user
+    user = get_user(socket)
     quoted_post_id = socket.assigns[:quote]
 
     {:ok, post} =
@@ -30,9 +31,11 @@ defmodule RocketchatWeb.TestLive do
       }
       |> Posts.create_post()
 
+    post = post |> Map.from_struct() |> Map.merge(%{user: user, reposted_by: nil})
+
     {:noreply,
      socket
-     |> stream_insert(:posts, %Posts.Post{post | user: user}, at: 0)
+     |> stream_insert(:posts, post, at: 0)
      |> assign(:quote, nil)}
   end
 
@@ -40,9 +43,35 @@ defmodule RocketchatWeb.TestLive do
     {:noreply, socket |> assign(:quote, id)}
   end
 
-  def handle_event("delete", %{"id" => id}, socket) do
-    post = %Post{id: id}
-    {:ok, _} = Posts.delete_post(post)
+  def handle_event("repost", %{"id" => id}, socket) do
+    {:ok, %Posts.Repost{post: post, user: user}} =
+      %{user: get_user(socket), post: %Posts.Post{id: id}}
+      |> Posts.create_repost()
+
+    post =
+      post
+      |> Map.from_struct()
+      |> Map.merge(%{reposted_by: user.email, quoted_post: nil})
+
+    {:noreply, socket |> stream_insert(:posts, post, at: 0)}
+  end
+
+  def handle_event("delete", %{"id" => id, "reposted_by" => reposted_by}, socket) do
+    post =
+      if reposted_by do
+        user = get_user(socket)
+
+        {:ok, _} =
+          %Posts.Repost{author_id: user.id, post_id: id}
+          |> Posts.delete_repost()
+
+        %{id: id, reposted_by: reposted_by}
+      else
+        post = %Post{id: id}
+        {:ok, _} = post |> Posts.delete_post()
+        post
+      end
+
     {:noreply, socket |> stream_delete(:posts, post)}
   end
 
@@ -63,8 +92,10 @@ defmodule RocketchatWeb.TestLive do
   defp post_card(assigns) do
     ~H"""
     <div id={@id} class="bg-neutral-400 rounded-lg p-2">
+      <div :if={@post.reposted_by}><b>Reposted by: </b><%= @post.reposted_by %></div>
       <div><b>by: </b><%= @post.user.email %></div>
       <div><%= @post.content %></div>
+      <div>on: <%= @post.inserted_at %></div>
       <%= if @post.quoted_post do %>
         <div class="bg-neutral-300 rounded-lg p-1">
           <b>Quote by: </b><%= @post.quoted_post.user.email %>
@@ -73,18 +104,26 @@ defmodule RocketchatWeb.TestLive do
           </div>
         </div>
       <% end %>
-      <button
-        class="font-bold p-1 rounded-lg bg-neutral-200"
-        phx-click={JS.push("delete", value: %{id: @post.id})}
-      >
-        delete
-      </button>
-      <button
-        class="font-bold p-1 rounded-lg bg-neutral-200"
-        phx-click={JS.push("quote", value: %{id: @post.id})}
-      >
-        quote
-      </button>
+      <div class="flex gap-2 p-2">
+        <button
+          class="font-bold p-1 rounded-lg bg-neutral-200"
+          phx-click={JS.push("delete", value: %{id: @post.id, reposted_by: @post.reposted_by})}
+        >
+          delete
+        </button>
+        <button
+          class="font-bold p-1 rounded-lg bg-neutral-200"
+          phx-click={JS.push("repost", value: %{id: @post.id})}
+        >
+          repost
+        </button>
+        <button
+          class="font-bold p-1 rounded-lg bg-neutral-200"
+          phx-click={JS.push("quote", value: %{id: @post.id})}
+        >
+          quote
+        </button>
+      </div>
     </div>
     """
   end
@@ -109,5 +148,9 @@ defmodule RocketchatWeb.TestLive do
     ~H"""
     <%= render_slot(@inner_block, @var) %>
     """
+  end
+
+  defp get_user(socket) do
+    socket.assigns.current_user
   end
 end

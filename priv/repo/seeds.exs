@@ -23,8 +23,8 @@ defmodule Seed do
     post_count = 500
     seed_posts(post_count)
     seed_likes(post_count * 5)
-    seed_reposts(post_count * 2)
     seed_quotes(post_count)
+    seed_reposts(post_count * 2)
   end
 
   defp seed_users(count) when is_integer(count) do
