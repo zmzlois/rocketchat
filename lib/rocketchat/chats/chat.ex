@@ -6,9 +6,10 @@ defmodule Rocketchat.Chats.Chat do
     field :name, :string
     field :direct_message?, :boolean, default: false
 
-    many_to_many :users, Rocketchat.Users.User, join_through: "user_chats"
+    many_to_many :users, Rocketchat.Users.User, join_through: Rocketchat.Chats.UserChat
+    has_many :user_chats, Rocketchat.Chats.UserChat
 
-    timestamps(type: :utc_datetime)
+    timestamps type: :utc_datetime
   end
 
   @doc false
