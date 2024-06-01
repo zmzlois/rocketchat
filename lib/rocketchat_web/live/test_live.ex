@@ -8,8 +8,22 @@ defmodule RocketchatWeb.TestLive do
     {:ok,
      socket
      |> assign(new_post: Posts.change_post(%Post{}))
-     # theres an issue with inserts cause reposts have an id of an original post but whatever
-     |> stream(:posts, Posts.list_posts(), limit: 100)}
+     |> stream(
+       :posts,
+       Posts.list_posts()
+       |> Stream.map(fn post ->
+         Map.merge(post, %{
+           id:
+             if post.reposted_by do
+               "#{post.id}-#{post.reposted_by}"
+             else
+               post.id
+             end,
+           post_id: post.id
+         })
+       end),
+       limit: 100
+     )}
   end
 
   @impl true
@@ -31,7 +45,14 @@ defmodule RocketchatWeb.TestLive do
       }
       |> Posts.create_post()
 
-    post = post |> Map.from_struct() |> Map.merge(%{user: user, reposted_by: nil})
+    post =
+      post
+      |> Map.from_struct()
+      |> Map.merge(%{
+        post_id: post.id,
+        user: user,
+        reposted_by: nil
+      })
 
     {:noreply,
      socket
@@ -51,7 +72,12 @@ defmodule RocketchatWeb.TestLive do
     post =
       post
       |> Map.from_struct()
-      |> Map.merge(%{reposted_by: user.email, quoted_post: nil})
+      |> Map.merge(%{
+        id: "#{post.id}-#{user.email}",
+        post_id: post.id,
+        reposted_by: user.email,
+        quoted_post: nil
+      })
 
     {:noreply, socket |> stream_insert(:posts, post, at: 0)}
   end
@@ -65,7 +91,7 @@ defmodule RocketchatWeb.TestLive do
           %Posts.Repost{author_id: user.id, post_id: id}
           |> Posts.delete_repost()
 
-        %{id: id, reposted_by: reposted_by}
+        %{id: "#{id}-#{reposted_by}"}
       else
         post = %Post{id: id}
         {:ok, _} = post |> Posts.delete_post()
@@ -107,19 +133,19 @@ defmodule RocketchatWeb.TestLive do
       <div class="flex gap-2 p-2">
         <button
           class="font-bold p-1 rounded-lg bg-neutral-200"
-          phx-click={JS.push("delete", value: %{id: @post.id, reposted_by: @post.reposted_by})}
+          phx-click={JS.push("delete", value: %{id: @post.post_id, reposted_by: @post.reposted_by})}
         >
           delete
         </button>
         <button
           class="font-bold p-1 rounded-lg bg-neutral-200"
-          phx-click={JS.push("repost", value: %{id: @post.id})}
+          phx-click={JS.push("repost", value: %{id: @post.post_id})}
         >
           repost
         </button>
         <button
           class="font-bold p-1 rounded-lg bg-neutral-200"
-          phx-click={JS.push("quote", value: %{id: @post.id})}
+          phx-click={JS.push("quote", value: %{id: @post.post_id})}
         >
           quote
         </button>
