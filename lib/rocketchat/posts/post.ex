@@ -14,7 +14,6 @@ defmodule Rocketchat.Posts.Post do
     timestamps type: :utc_datetime
 
     has_many :likes, Rocketchat.Posts.Like
-    has_many :reposts, Rocketchat.Posts.Repost
     has_many :quotes, Rocketchat.Posts.Post, foreign_key: :quoted_post_id
   end
 

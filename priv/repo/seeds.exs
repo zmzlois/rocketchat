@@ -26,7 +26,6 @@ defmodule Seed do
     seed_posts(post_count)
     seed_likes(post_count * 5)
     seed_quotes(post_count)
-    seed_reposts(post_count * 2)
 
     seed_chats(user_count, fn -> Faker.random_between(1, 5) end)
   end
@@ -58,16 +57,6 @@ defmodule Seed do
   defp seed_likes(count) when is_integer(count) do
     for _ <- 1..count do
       %Posts.Like{
-        user: DataProvider.get_random_row(Users.User),
-        post: DataProvider.get_random_row(Posts.Post)
-      }
-    end
-    |> insert_all(on_conflict: :nothing)
-  end
-
-  defp seed_reposts(count) when is_integer(count) do
-    for _ <- 1..count do
-      %Posts.Repost{
         user: DataProvider.get_random_row(Users.User),
         post: DataProvider.get_random_row(Posts.Post)
       }

@@ -10,31 +10,9 @@ defmodule Rocketchat.Posts do
 
   alias Rocketchat.Posts.Post
 
+  # todo
   def list_posts do
-    alias Rocketchat.Posts.Repost
-    alias Users.User
-
-    posts_query =
-      from p in Post,
-        select: %{p | reposted_by: nil, posted_at: p.inserted_at}
-
-    reposts_query =
-      from r in Repost,
-        inner_join: p in Post,
-        on: r.post_id == p.id,
-        inner_join: u in User,
-        on: r.author_id == u.id,
-        select: %{p | reposted_by: u.email, posted_at: r.inserted_at}
-
-    union_query =
-      from p in posts_query,
-        union_all: ^reposts_query
-
-    from(p in subquery(union_query),
-      order_by: [desc: p.posted_at, asc: p.id]
-    )
-    |> Repo.all()
-    |> Repo.preload([:likes, :user, :quotes, quoted_post: [:user]])
+    []
   end
 
   @doc """
@@ -176,74 +154,5 @@ defmodule Rocketchat.Posts do
   """
   def change_like(%Like{} = like, attrs \\ %{}) do
     Like.changeset(like, attrs)
-  end
-
-  alias Rocketchat.Posts.Repost
-
-  @doc """
-  Gets a single repost.
-
-  Raises `Ecto.NoResultsError` if the Repost does not exist.
-
-  ## Examples
-
-      iex> get_repost!(123)
-      %Repost{}
-
-      iex> get_repost!(456)
-      ** (Ecto.NoResultsError)
-
-  """
-  def get_repost!(id), do: Repo.get!(Repost, id)
-
-  @doc """
-  Creates a repost.
-
-  ## Examples
-
-      iex> create_repost(%{field: value})
-      {:ok, %Repost{}}
-
-      iex> create_repost(%{field: bad_value})
-      {:error, %Ecto.Changeset{}}
-
-  """
-  def create_repost(attrs = %{user: %Users.User{}, post: %Post{}}) do
-    with {:ok, repost} <-
-           Ecto.build_assoc(attrs.post, :reposts)
-           |> change_repost(attrs)
-           |> Changeset.put_assoc(:user, attrs.user)
-           |> Repo.insert() do
-      {:ok, Repo.preload(repost, post: [:user])}
-    end
-  end
-
-  @doc """
-  Deletes a repost.
-
-  ## Examples
-
-      iex> delete_repost(repost)
-      {:ok, %Repost{}}
-
-      iex> delete_repost(repost)
-      {:error, %Ecto.Changeset{}}
-
-  """
-  def delete_repost(%Repost{} = repost) do
-    Repo.delete(repost)
-  end
-
-  @doc """
-  Returns an `%Ecto.Changeset{}` for tracking repost changes.
-
-  ## Examples
-
-      iex> change_repost(repost)
-      %Ecto.Changeset{data: %Repost{}}
-
-  """
-  def change_repost(%Repost{} = repost, attrs \\ %{}) do
-    Repost.changeset(repost, attrs)
   end
 end

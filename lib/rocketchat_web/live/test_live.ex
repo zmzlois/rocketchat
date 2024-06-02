@@ -8,22 +8,7 @@ defmodule RocketchatWeb.TestLive do
     {:ok,
      socket
      |> assign(new_post: Posts.change_post(%Post{}), quote: nil)
-     |> stream(
-       :posts,
-       Posts.list_posts()
-       |> Stream.map(fn post ->
-         Map.merge(post, %{
-           id:
-             if post.reposted_by do
-               "#{post.id}-#{post.reposted_by}"
-             else
-               post.id
-             end,
-           post_id: post.id
-         })
-       end),
-       limit: 100
-     )}
+     |> stream(:posts, Posts.list_posts(), limit: 100)}
   end
 
   @impl true
@@ -65,39 +50,11 @@ defmodule RocketchatWeb.TestLive do
   end
 
   def handle_event("repost", %{"id" => id}, socket) do
-    {:ok, %Posts.Repost{post: post, user: user}} =
-      %{user: get_user(socket), post: %Posts.Post{id: id}}
-      |> Posts.create_repost()
-
-    post =
-      post
-      |> Map.from_struct()
-      |> Map.merge(%{
-        id: "#{post.id}-#{user.email}",
-        post_id: post.id,
-        reposted_by: user.email,
-        quoted_post: nil
-      })
-
-    {:noreply, socket |> stream_insert(:posts, post, at: 0)}
+    {:noreply, socket |> stream_insert(:posts, id, at: 0)}
   end
 
   def handle_event("delete", %{"id" => id, "reposted_by" => reposted_by}, socket) do
-    post =
-      if reposted_by do
-        user = get_user(socket)
-
-        {:ok, _} =
-          %Posts.Repost{author_id: user.id, post_id: id}
-          |> Posts.delete_repost()
-
-        %{id: "#{id}-#{reposted_by}"}
-      else
-        post = %Post{id: id}
-        {:ok, _} = post |> Posts.delete_post()
-        post
-      end
-
+    post = {id, reposted_by}
     {:noreply, socket |> stream_delete(:posts, post)}
   end
 
