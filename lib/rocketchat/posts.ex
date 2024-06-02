@@ -10,11 +10,6 @@ defmodule Rocketchat.Posts do
 
   alias Rocketchat.Posts.Post
 
-  # todo
-  def list_posts do
-    []
-  end
-
   @doc """
   Gets a single post.
 
@@ -154,5 +149,101 @@ defmodule Rocketchat.Posts do
   """
   def change_like(%Like{} = like, attrs \\ %{}) do
     Like.changeset(like, attrs)
+  end
+
+  alias Rocketchat.Posts.FeedPost
+
+  @doc """
+  Returns the list of feed_posts.
+
+  ## Examples
+
+      iex> list_feed_posts()
+      [%FeedPost{}, ...]
+
+  """
+  def list_feed_posts do
+    Repo.all(FeedPost)
+  end
+
+  @doc """
+  Gets a single feed_post.
+
+  Raises `Ecto.NoResultsError` if the Feed post does not exist.
+
+  ## Examples
+
+      iex> get_feed_post!(123)
+      %FeedPost{}
+
+      iex> get_feed_post!(456)
+      ** (Ecto.NoResultsError)
+
+  """
+  def get_feed_post!(id), do: Repo.get!(FeedPost, id)
+
+  @doc """
+  Creates a feed_post.
+
+  ## Examples
+
+      iex> create_feed_post(%{field: value})
+      {:ok, %FeedPost{}}
+
+      iex> create_feed_post(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def create_feed_post(attrs \\ %{}) do
+    %FeedPost{}
+    |> change_feed_post(attrs)
+    |> Repo.insert()
+  end
+
+  @doc """
+  Updates a feed_post.
+
+  ## Examples
+
+      iex> update_feed_post(feed_post, %{field: new_value})
+      {:ok, %FeedPost{}}
+
+      iex> update_feed_post(feed_post, %{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def update_feed_post(%FeedPost{} = feed_post, attrs) do
+    feed_post
+    |> change_feed_post(attrs)
+    |> Repo.update()
+  end
+
+  @doc """
+  Deletes a feed_post.
+
+  ## Examples
+
+      iex> delete_feed_post(feed_post)
+      {:ok, %FeedPost{}}
+
+      iex> delete_feed_post(feed_post)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def delete_feed_post(%FeedPost{} = feed_post) do
+    Repo.delete(feed_post)
+  end
+
+  @doc """
+  Returns an `%Ecto.Changeset{}` for tracking feed_post changes.
+
+  ## Examples
+
+      iex> change_feed_post(feed_post)
+      %Ecto.Changeset{data: %FeedPost{}}
+
+  """
+  def change_feed_post(%FeedPost{} = feed_post, attrs \\ %{}) do
+    FeedPost.changeset(feed_post, attrs)
   end
 end

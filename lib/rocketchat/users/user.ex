@@ -9,6 +9,7 @@ defmodule Rocketchat.Users.User do
     timestamps()
 
     has_many :posts, Rocketchat.Posts.Post, foreign_key: :author_id
+    has_many :feed_posts, Rocketchat.Posts.FeedPost, foreign_key: :posted_by
     has_many :likes, Rocketchat.Posts.Like
 
     many_to_many :chats, Rocketchat.Chats.Chat, join_through: Rocketchat.Chats.UserChat
