@@ -12,6 +12,6 @@ defmodule Rocketchat.Repo.Migrations.CreateFeedPosts do
       timestamps type: :utc_datetime
     end
 
-    unique_index(:feed_posts, [:post_id, :posted_by])
+    create unique_index(:feed_posts, [:post_id, :posted_by])
   end
 end

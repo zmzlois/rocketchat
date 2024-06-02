@@ -24,6 +24,7 @@ defmodule Seed do
 
     post_count = magnitude * 10
     seed_posts(post_count)
+    seed_reposts(post_count * 2)
     seed_likes(post_count * 5)
     seed_quotes(post_count)
 
@@ -41,17 +42,31 @@ defmodule Seed do
 
   defp seed_posts(count) when is_integer(count) do
     for _ <- 1..count do
-      %Posts.Post{
+      post = %Posts.Post{
         user: DataProvider.get_random_row(Users.User),
         content: Faker.Lorem.paragraph(),
         summary: maybe(&Faker.Lorem.paragraph/0),
         audio_key: Faker.UUID.v4(),
         topic: maybe(&Faker.Company.buzzword/0)
       }
+
+      %Posts.FeedPost{post: post, user: post.user}
     end
     |> insert_all()
 
     DataProvider.update(Posts.Post)
+    DataProvider.update(Posts.FeedPost)
+  end
+
+  defp seed_reposts(count) when is_integer(count) do
+    for _ <- 1..count do
+      post = DataProvider.get_random_row(Posts.Post)
+      user = DataProvider.get_random_row(Users.User)
+      %Posts.FeedPost{post: post, user: user}
+    end
+    |> insert_all(on_conflict: :nothing)
+
+    DataProvider.update(Posts.FeedPost)
   end
 
   defp seed_likes(count) when is_integer(count) do
