@@ -68,6 +68,9 @@ defmodule RocketchatWeb.Router do
     live "/cursor", CursorLive
 
     live "/feed", FeedLive
+
+    # mon test
+    live "/test", TestLive
   end
 
   # Other scopes may use custom stacks.
