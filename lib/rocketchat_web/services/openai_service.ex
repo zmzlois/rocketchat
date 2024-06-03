@@ -11,12 +11,60 @@ defmodule RocketchatWeb.Services.OpenaiService do
     {:ok, {org_id, project_id, secret_key}}
   end
 
-  def transcribe_stream(credentials) do
+  def transcribe_stream(credentials, file_name) do
     {_, {org_id, project_id, secret_key}} = credentials
 
-    # send an API request to OpenAI
+    voice_message_folder = "/static/uploads/voice_message" 
 
-    # return the stream
+    folder = Path.join(:code.priv_dir(:rocketchat), voice_message_folder)
+
+    file_path = Path.join(folder, file_name)
+
+    file_contents = File.read!(file_path)
+
+    file_name = if (! String.ends_with?(file_name, ".mp3")) do
+      file_name <> ".mp3"
+    else
+      file_name
+    end
+
+    model = "whisper-1"
+
+    multipart =
+      Multipart.new()
+      |> Multipart.add_part(Multipart.Part.text_field(model, "model"))
+      |> Multipart.add_part(Multipart.Part.text_field("true", "stream"))
+      |> Multipart.add_part(Multipart.Part.text_field("response_format", "text"))
+      |> Multipart.add_part(
+        Multipart.Part.file_content_field(file_name, file_contents, :file, filename: file_name)
+      )
+
+    url = "https://api.openai.com/v1/audio/transcriptions"
+
+    content_length = Multipart.content_length(multipart)
+    content_type = Multipart.content_type(multipart, "multipart/form-data")
+
+    headers = %{
+      "Authorization" => "Bearer #{secret_key}",
+      "OpenAI-Organization" => org_id,
+      "OpenAI-Project" => project_id,
+      "Content-Type" => content_type,
+      "Content-Length" => to_string(content_length)
+    }
+
+    resp = 
+      Req.post!(url, 
+        headers: headers, 
+        body: Multipart.body_stream(multipart),
+        into: fn {:data, data}, context -> 
+          IO.inspect(data) 
+          {:cont, context}
+        end
+      )
+
+    IO.inspect(resp)
+
+    {:ok}
   end
   
   def transcribe!(credentials, file_name) do
@@ -41,10 +89,6 @@ defmodule RocketchatWeb.Services.OpenaiService do
     else
       file_name
     end
-
-    IO.inspect(file_contents)
-    IO.inspect(file_name)
-    IO.inspect(file_contents)
 
     model = "whisper-1"
 
