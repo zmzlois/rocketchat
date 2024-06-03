@@ -9,6 +9,7 @@ defmodule Rocketchat.Repo.Migrations.CreatePosts do
       add :summary, :string, size: 1023
       add :topic, :string
       add :audio_key, :string, null: false
+      add :quoted_post_id, references(:posts, on_delete: :nilify_all, on_update: :update_all)
 
       timestamps(type: :utc_datetime)
     end
