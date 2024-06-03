@@ -50,7 +50,9 @@ defmodule RocketchatWeb.Router do
     live_session :user, on_mount: RocketchatWeb.Setup.Authorized do
       live "/", IndexLive
       live "/feed", FeedLive
+
       live "/feed_test", FeedTestLive
+      live "/speech_test", SpeechTestLive
     end
   end
 

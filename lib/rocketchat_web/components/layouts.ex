@@ -13,10 +13,11 @@ defmodule RocketchatWeb.Layouts do
   def app(assigns) do
     ~H"""
     <header class="px-4 sm:px-6 lg:px-8">
-      <nav>
-        <.link patch={~p"/"}>home</.link>
-        <.link patch={~p"/feed"}>feed</.link>
-        <.link patch={~p"/feed_test"}>test</.link>
+      <nav class="flex gap-2">
+        <.pretty_link patch={~p"/"}>home</.pretty_link>
+        <.pretty_link patch={~p"/feed"}>feed</.pretty_link>
+        <.pretty_link patch={~p"/feed_test"}>feed test</.pretty_link>
+        <.pretty_link patch={~p"/speech_test"}>speech test</.pretty_link>
       </nav>
     </header>
     <main class="px-4 py-20 sm:px-6 lg:px-8">
@@ -25,6 +26,14 @@ defmodule RocketchatWeb.Layouts do
         <%= @inner_content %>
       </div>
     </main>
+    """
+  end
+
+  defp pretty_link(assigns) do
+    ~H"""
+    <.link patch={@patch} class="hover:underline">
+      <%= render_slot(@inner_block) %>
+    </.link>
     """
   end
 
