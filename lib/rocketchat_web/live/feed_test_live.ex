@@ -1,4 +1,4 @@
-defmodule RocketchatWeb.TestLive do
+defmodule RocketchatWeb.FeedTestLive do
   alias Rocketchat.Posts
   alias Rocketchat.Posts.Post
   use RocketchatWeb, :live_view
