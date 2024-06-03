@@ -8,7 +8,7 @@ defmodule Rocketchat.Posts do
   alias Ecto.Changeset
   alias Rocketchat.Repo
 
-  alias Rocketchat.Posts.Post
+  alias Rocketchat.Posts.{Post, FeedPost}
 
   @doc """
   Gets a single post.
@@ -27,33 +27,45 @@ defmodule Rocketchat.Posts do
   def get_post!(id), do: Repo.get!(Post, id)
 
   @doc """
-  Creates a post.
-
-  ## Examples
-
-      iex> create_post(%{field: value})
-      {:ok, %Post{}}
-
-      iex> create_post(%{field: bad_value})
-      {:error, %Ecto.Changeset{}}
-
+  Creates a post and an associated feed_post.
+  Returns `{:ok, %FeedPost{}} | {:error, Ecto.Changeset.t()}`
   """
-  def create_post(attrs = %{user: %Users.User{}}) do
-    quoted_post = attrs[:quoted_post]
-
+  def create_post(
+        attrs = %{content: _, audio_key: _},
+        author = %Users.User{},
+        quoted_post_id \\ nil
+      ) do
     post =
-      if quoted_post do
-        Ecto.build_assoc(quoted_post, :quotes)
-      else
-        %Post{}
-      end
+      %Post{quoted_post_id: quoted_post_id}
+      |> change_post(attrs)
+      |> Changeset.put_assoc(:user, author)
 
-    with {:ok, post} <-
-           post
-           |> change_post(attrs)
-           |> Changeset.put_assoc(:user, attrs.user)
-           |> Repo.insert() do
-      {:ok, Repo.preload(post, quoted_post: [:user])}
+    query =
+      %FeedPost{}
+      |> change_feed_post()
+      |> Changeset.put_assoc(:user, author)
+      |> Changeset.put_assoc(:post, post)
+      |> Repo.insert()
+
+    with {:ok, feed_post} <- query do
+      {:ok, feed_post |> preload_feed_post_data()}
+    end
+  end
+
+  @doc """
+  Creates a post and an associated feed_post.
+  Returns `{:ok, %FeedPost{}} | {:error, Ecto.Changeset.t()}`
+  """
+  def create_repost(post_id, author = %Users.User{}) do
+    query =
+      %Post{id: post_id}
+      |> Ecto.build_assoc(:feed_posts)
+      |> change_feed_post()
+      |> Changeset.put_assoc(:user, author)
+      |> Repo.insert()
+
+    with {:ok, feed_post} <- query do
+      {:ok, feed_post |> preload_feed_post_data()}
     end
   end
 
@@ -70,7 +82,7 @@ defmodule Rocketchat.Posts do
 
   """
   def delete_post(%Post{} = post) do
-    Repo.delete(post)
+    post |> Repo.preload(:feed_posts) |> Repo.delete()
   end
 
   @doc """
@@ -163,7 +175,22 @@ defmodule Rocketchat.Posts do
 
   """
   def list_feed_posts do
-    Repo.all(FeedPost)
+    Repo.all(
+      from p in FeedPost,
+        order_by: [desc: p.inserted_at, asc: p.id]
+    )
+    |> preload_feed_post_data()
+  end
+
+  defp preload_feed_post_data(feed_post_or_posts) do
+    feed_post_or_posts
+    |> Repo.preload([
+      :user,
+      post: [
+        :user,
+        quoted_post: [:user]
+      ]
+    ])
   end
 
   @doc """
