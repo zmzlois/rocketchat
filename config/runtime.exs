@@ -114,6 +114,11 @@ defmodule Config.Runtime do
 
   def setup(:dev) do
     setup_local_db_connection()
+
+    config :rocketchat,
+      openai_org_id: env!("OPENAI_ORG_ID", :string),
+      openai_project_id: env!("OPENAI_PROJECT_ID", :string),
+      openai_secret_id: env!("OPENAI_SECRET_KEY", :string)
   end
 
   def setup(:test) do
