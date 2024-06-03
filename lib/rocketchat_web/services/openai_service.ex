@@ -1,6 +1,6 @@
 defmodule RocketchatWeb.Services.OpenaiService do
-
-  @type credentials_type() :: {:org_id, String.t, :project_id, String.t, :secret_key, String.t}
+  @type credentials_type() ::
+          {:org_id, String.t(), :project_id, String.t(), :secret_key, String.t()}
 
   @spec new() :: {:ok, credentials_type()}
   def new() do
@@ -12,9 +12,9 @@ defmodule RocketchatWeb.Services.OpenaiService do
   end
 
   def transcribe_stream(credentials, file_name) do
-    {_, {org_id, project_id, secret_key}} = credentials
+    {:ok, {org_id, project_id, secret_key}} = credentials
 
-    voice_message_folder = "/static/uploads/voice_message" 
+    voice_message_folder = "/static/uploads/voice_message"
 
     folder = Path.join(:code.priv_dir(:rocketchat), voice_message_folder)
 
@@ -22,11 +22,12 @@ defmodule RocketchatWeb.Services.OpenaiService do
 
     file_contents = File.read!(file_path)
 
-    file_name = if (! String.ends_with?(file_name, ".mp3")) do
-      file_name <> ".mp3"
-    else
-      file_name
-    end
+    file_name =
+      if !String.ends_with?(file_name, ".mp3") do
+        file_name <> ".mp3"
+      else
+        file_name
+      end
 
     model = "whisper-1"
 
@@ -52,12 +53,12 @@ defmodule RocketchatWeb.Services.OpenaiService do
       "Content-Length" => to_string(content_length)
     }
 
-    resp = 
-      Req.post!(url, 
-        headers: headers, 
+    resp =
+      Req.post!(url,
+        headers: headers,
         body: Multipart.body_stream(multipart),
-        into: fn {:data, data}, context -> 
-          IO.inspect(data) 
+        into: fn {:data, data}, context ->
+          IO.inspect(data)
           {:cont, context}
         end
       )
@@ -66,7 +67,7 @@ defmodule RocketchatWeb.Services.OpenaiService do
 
     {:ok}
   end
-  
+
   def transcribe!(credentials, file_name) do
     {:ok, r} = transcribe(credentials, file_name)
 
@@ -74,9 +75,9 @@ defmodule RocketchatWeb.Services.OpenaiService do
   end
 
   def transcribe(credentials, file_name) do
-    {_, {org_id, project_id, secret_key}} = credentials
+    {:ok, {org_id, project_id, secret_key}} = credentials
 
-    voice_message_folder = "/static/uploads/voice_message" 
+    voice_message_folder = "/static/uploads/voice_message"
 
     folder = Path.join(:code.priv_dir(:rocketchat), voice_message_folder)
 
@@ -84,11 +85,12 @@ defmodule RocketchatWeb.Services.OpenaiService do
 
     file_contents = File.read!(file_path)
 
-    file_name = if (! String.ends_with?(file_name, ".mp3")) do
-      file_name <> ".mp3"
-    else
-      file_name
-    end
+    file_name =
+      if !String.ends_with?(file_name, ".mp3") do
+        file_name <> ".mp3"
+      else
+        file_name
+      end
 
     model = "whisper-1"
 
@@ -113,9 +115,9 @@ defmodule RocketchatWeb.Services.OpenaiService do
       "Content-Length" => to_string(content_length)
     }
 
-    resp = 
-      Req.post!(url, 
-        headers: headers, 
+    resp =
+      Req.post!(url,
+        headers: headers,
         body: Multipart.body_stream(multipart)
       )
 
@@ -137,15 +139,15 @@ defmodule RocketchatWeb.Services.OpenaiService do
       "Authorization" => "Bearer #{secret_key}",
       "OpenAI-Organization" => org_id,
       "OpenAI-Project" => project_id,
-      "Content-Type" => "application/json",
+      "Content-Type" => "application/json"
     }
 
     url = "https://api.openai.com/v1/chat/completions"
     model = "gpt-3.5-turbo-0125"
 
-    resp = 
-      Req.post!(url, 
-        headers: headers, 
+    resp =
+      Req.post!(url,
+        headers: headers,
         json: %{
           "model" => model,
           "response_format" => %{
