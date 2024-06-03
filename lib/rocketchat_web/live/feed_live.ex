@@ -9,7 +9,7 @@ defmodule RocketchatWeb.FeedLive do
     ~H"""
     <div class="flex flex-col justify-center items-center h-screen bg-[#222222]">
       <!-- Mobile View -->
-      <div class="w-[25%] max-w-[25%] min-h-[80vh] max-h-[80vh] bg-gray-50 relative overflow-y-scroll hide-scrollbar">
+      <div class="max-w-96 min-h-[80vh] max-h-[80vh] bg-gray-50 relative overflow-y-scroll hide-scrollbar">
         <.top_header tab={@tab} />
 
         <.new_message_box />
@@ -36,12 +36,6 @@ defmodule RocketchatWeb.FeedLive do
     socket = assign(socket, :tab, tab)
 
     {:ok, socket, layout: false}
-  end
-
-  def handle_event("inc_temperature", _params, socket) do
-    IO.inspect(socket.assigns.current_user, label: "current_user in handle_event/3")
-
-    {:noreply, update(socket, :temperature, &(&1 + 1))}
   end
 
   def handle_event("switch_tabs", %{"tab" => "fyp"}, socket) do

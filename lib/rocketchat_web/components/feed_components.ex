@@ -1,12 +1,11 @@
 defmodule RocketchatWeb.FeedComponents do
   use Phoenix.Component
-
   import RocketchatWeb.Icons
+
+  attr :tab, :string, required: true
 
   def top_header(assigns) do
     IO.inspect(assigns.tab)
-
-    active_tab_button_class = "border-b-2 border-cyan-500 font-semibold whitespace-nowrap"
 
     ~H"""
     <div class="flex flex-col gap-5 pt-5 bg-white sticky top-0 z-10">
@@ -21,22 +20,31 @@ defmodule RocketchatWeb.FeedComponents do
       </div>
       <!-- Feed Tabs -->
       <div class="flex justify-center gap-10 px-20">
-        <button
-          phx-click="switch_tabs"
-          phx-value-tab="fyp"
-          class={if @tab === :fyp, do: active_tab_button_class}
-        >
+        <.tab_button active?={@tab == :fyp} tab="fyp">
           For You
-        </button>
-        <button
-          phx-click="switch_tabs"
-          phx-value-tab="following"
-          class={if @tab === :following, do: active_tab_button_class}
-        >
+        </.tab_button>
+        <.tab_button active?={@tab == :following} tab="following">
           Following
-        </button>
+        </.tab_button>
       </div>
     </div>
+    """
+  end
+
+  attr :tab, :string, required: true
+  attr :active?, :boolean, required: true
+
+  slot :inner_block, required: true
+
+  defp tab_button(assigns) do
+    ~H"""
+    <button
+      phx-click="switch_tabs"
+      phx-value-tab={@tab}
+      class={if @active?, do: "border-b-2 border-cyan-500 font-semibold whitespace-nowrap"}
+    >
+      <%= render_slot(@inner_block) %>
+    </button>
     """
   end
 

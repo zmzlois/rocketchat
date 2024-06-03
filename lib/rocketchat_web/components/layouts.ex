@@ -13,30 +13,12 @@ defmodule RocketchatWeb.Layouts do
   def app(assigns) do
     ~H"""
     <header class="px-4 sm:px-6 lg:px-8">
-      <div class="flex items-center justify-between border-b border-zinc-100 py-3 text-sm">
-        <div class="flex items-center gap-4">
-          <a href="/">
-            <img src={~p"/images/logo.svg"} width="36" />
-          </a>
-          <p class="bg-brand/5 text-brand rounded-full px-2 font-medium leading-6">
-            v<%= Application.spec(:phoenix, :vsn) %>
-          </p>
-        </div>
-        <div class="flex items-center gap-4 font-semibold leading-6 text-zinc-900">
-          <a href="https://twitter.com/elixirphoenix" class="hover:text-zinc-700">
-            @elixirphoenix
-          </a>
-          <a href="https://github.com/phoenixframework/phoenix" class="hover:text-zinc-700">
-            GitHub
-          </a>
-          <a
-            href="https://hexdocs.pm/phoenix/overview.html"
-            class="rounded-lg bg-zinc-100 px-2 py-1 hover:bg-zinc-200/80"
-          >
-            Get Started <span aria-hidden="true">&rarr;</span>
-          </a>
-        </div>
-      </div>
+      <nav class="flex gap-2">
+        <.pretty_link patch={~p"/"}>home</.pretty_link>
+        <.pretty_link patch={~p"/feed"}>feed</.pretty_link>
+        <.pretty_link patch={~p"/feed_test"}>feed test</.pretty_link>
+        <.pretty_link patch={~p"/speech_test"}>speech test</.pretty_link>
+      </nav>
     </header>
     <main class="px-4 py-20 sm:px-6 lg:px-8">
       <div class="mx-auto max-w-2xl">
@@ -44,6 +26,14 @@ defmodule RocketchatWeb.Layouts do
         <%= @inner_content %>
       </div>
     </main>
+    """
+  end
+
+  defp pretty_link(assigns) do
+    ~H"""
+    <.link patch={@patch} class="hover:underline">
+      <%= render_slot(@inner_block) %>
+    </.link>
     """
   end
 
@@ -55,7 +45,7 @@ defmodule RocketchatWeb.Layouts do
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="csrf-token" content={get_csrf_token()} />
-        <.live_title suffix=" · Phoenix Framework">
+        <.live_title suffix={assigns[:page_title] && " · Rocketchat"}>
           <%= assigns[:page_title] || "Rocketchat" %>
         </.live_title>
         <link phx-track-static rel="stylesheet" href={~p"/assets/app.css"} />
