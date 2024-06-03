@@ -14,7 +14,7 @@ module.exports = {
       },
     },
     fontFamily: {
-     'spacemonkey': ["SpaceMonkey"],
+      spacemonkey: ["SpaceMonkey"],
     },
   },
   plugins: [
