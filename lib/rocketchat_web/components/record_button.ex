@@ -15,7 +15,7 @@ defmodule RocketchatWeb.RecordButton do
        auto_upload: true,
        # 25MB is Minio limit
        max_file_size: 25 * 1024 * 1024
-     ), layout: false}
+     )}
   end
 
   @impl true
@@ -30,27 +30,20 @@ defmodule RocketchatWeb.RecordButton do
   def handle_event("uploaded", _params, socket) do
     consume_uploaded_entries(socket, :audio, fn
       %{path: path}, %Phoenix.LiveView.UploadEntry{} ->
-        dest_dir = Application.app_dir(:rocketchat, "priv/static/uploads/voice_message")
-        :ok = File.mkdir_p(dest_dir)
+        with %{handle_recording: handler} <- socket.assigns do
+          path |> File.read!() |> handler.()
+        end
 
-        filename = Path.basename(path)
-        dest = dest_dir |> Path.join(filename)
-        File.cp!(path, dest)
-        {:ok, nil}
+        {:ok, path}
     end)
 
     {:noreply, socket}
   end
 
-  def handle_event(_, _, socket) do
-    {:noreply, socket}
-  end 
-
   @impl true
   def render(assigns) do
     ~H"""
     <form phx-submit="uploaded" phx-target={@myself} class="flex flex-col items-center p-2">
-      <.flash_group flash={@flash} />
       <button
         id="audio-recorder"
         type="button"

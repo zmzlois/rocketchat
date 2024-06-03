@@ -16,8 +16,6 @@ defmodule RocketchatWeb.IndexLive do
     ~H"""
     <div>
       <h1>Rocketchat</h1>
-      <.flash_group flash={@flash} />
-      <.live_component module={RocketchatWeb.RecordButton} id="audio-recorder" />
     </div>
     """
   end
